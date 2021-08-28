@@ -1,14 +1,15 @@
 package com.samuilolegovich;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.samuilolegovich.model.TestDtoClasses;
 import com.samuilolegovich.model.TestPayment;
-import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
+
+import java.util.Locale;
 
 public class XRPLedgerApplication {
-//    private static String xrpAddress = "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
 
-    public static void main(String[] args) throws JsonRpcClientErrorException, JsonProcessingException {
+    public static void main(String[] args)  {
+        // Обязательно стоит установить локаль иначе будет падать с ошибкой парсинга даты
+        Locale.setDefault(Locale.ENGLISH);
         new TestDtoClasses().run();
         new TestPayment().run();
 
