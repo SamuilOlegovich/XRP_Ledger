@@ -9,7 +9,8 @@ import org.xrpl.xrpl4j.crypto.PublicKey;
 import org.xrpl.xrpl4j.crypto.signing.*;
 import org.xrpl.xrpl4j.keypairs.KeyPairService;
 
-public class SingleKeySignatureService extends AbstractSignatureService implements SignatureService {
+public class SingleKeySignatureService extends AbstractSignatureService implements SignatureService
+{
     private PrivateKey privateKey;
 
     public SingleKeySignatureService(PrivateKey privateKey) {

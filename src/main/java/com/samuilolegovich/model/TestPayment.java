@@ -94,24 +94,22 @@ public class TestPayment implements Runnable {
                 .build();
 
         System.out.println("Constructed Payment: " + payment);
-        /*
-            Вывод:
-                Constructed Payment: Payment
-                    {
-                        account=rMCcNuTcajgw7YTgBy1sys3b89QqjUrMpH,
-                        fee=10,
-                        sequence=16449361,
-                        lastLedgerSequence=20484790,
-                        memos=[],
-                        signers=[],
-                        signingPublicKey=039543A0D3004CDA0904A09FB3710251C652D69EA338589279BC849D47A7B019A1,
-                        flags=2147483648,
-                        amount=1000000,
-                        destination=rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe,
-                        paths=[]
-                     }
-         */
-
+                /*  Вывод:
+                        Constructed Payment: Payment
+                            {
+                                account=rMCcNuTcajgw7YTgBy1sys3b89QqjUrMpH,
+                                fee=10,
+                                sequence=16449361,
+                                lastLedgerSequence=20484790,
+                                memos=[],
+                                signers=[],
+                                signingPublicKey=039543A0D3004CDA0904A09FB3710251C652D69EA338589279BC849D47A7B019A1,
+                                flags=2147483648,
+                                amount=1000000,
+                                destination=rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe,
+                                paths=[]
+                             }
+                 */
 
 
         // Подписать транзакцию -----------------------------------------------------------
