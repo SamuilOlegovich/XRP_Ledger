@@ -42,14 +42,14 @@ public class TestPayment implements Runnable {
         // Получите классический адрес из testWallet
         Address classicAddress = testWallet.classicAddress();
 
-        System.out.println(classicAddress);         // Должен выдать адресс - rMCcNuTcajgw7YTgBy1sys3b89QqjUrMpH
+        System.out.println("Classic address:\n" + classicAddress + "\n");         // Должен выдать адресс - rMCcNuTcajgw7YTgBy1sys3b89QqjUrMpH
 
 
         // Подключение к серверу Testnet --------------------------------------------------------------------
         HttpUrl rippledUrl = HttpUrl.get("https://s.altnet.rippletest.net:51234/");
         XrplClient xrplClient = new XrplClient(rippledUrl);
 
-        System.out.println(xrplClient.getJsonRpcClient());  // Выдаст - HardCodedTarget(type=JsonRpcClient, url=https://s.altnet.rippletest.net:51234/)
+        System.out.println("Xrpl client:\n" + xrplClient.getJsonRpcClient() + "\n");  // Выдаст - HardCodedTarget(type=JsonRpcClient, url=https://s.altnet.rippletest.net:51234/)
 
 
         // Готовим транзакцию ---------------------------------------------- ----------
@@ -93,7 +93,7 @@ public class TestPayment implements Runnable {
                 .lastLedgerSequence(lastLedgerSequence)
                 .build();
 
-        System.out.println("Constructed Payment: " + payment);
+        System.out.println("Constructed Payment:\n" + payment + "\n");
                 /*  Вывод:
                         Constructed Payment: Payment
                             {
@@ -115,6 +115,8 @@ public class TestPayment implements Runnable {
         // Подписать транзакцию -----------------------------------------------------------
         // Создайте SignatureService для подписи платежа
         PrivateKey privateKey = PrivateKey.fromBase16EncodedPrivateKey(testWallet.privateKey().get());
+        System.out.println("Private key:\n" + privateKey);
+
         SignatureService signatureService = new SingleKeySignatureService(privateKey);
 //                SingleKeySignatureService.builder()
 //                .privateKey(privateKey)

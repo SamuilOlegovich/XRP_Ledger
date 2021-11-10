@@ -16,7 +16,6 @@ public class SingleKeySignatureService extends AbstractSignatureService implemen
     public SingleKeySignatureService(PrivateKey privateKey) {
         super(null, null, null);
         this.privateKey = privateKey;
-
     }
 
     public SingleKeySignatureService(KeyStoreType keyStoreType,
