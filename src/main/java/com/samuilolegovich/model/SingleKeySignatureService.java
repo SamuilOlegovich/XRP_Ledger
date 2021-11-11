@@ -8,15 +8,10 @@ import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.PublicKey;
 import org.xrpl.xrpl4j.crypto.signing.*;
 import org.xrpl.xrpl4j.keypairs.KeyPairService;
+import org.xrpl.xrpl4j.model.transactions.Payment;
+import org.xrpl.xrpl4j.model.transactions.Transaction;
 
-public class SingleKeySignatureService extends AbstractSignatureService implements SignatureService
-{
-    private PrivateKey privateKey;
-
-    public SingleKeySignatureService(PrivateKey privateKey) {
-        super(null, null, null);
-        this.privateKey = privateKey;
-    }
+public class SingleKeySignatureService extends AbstractSignatureService implements SignatureService {
 
     public SingleKeySignatureService(KeyStoreType keyStoreType,
                                      SignatureUtils signatureUtils,
@@ -44,11 +39,11 @@ public class SingleKeySignatureService extends AbstractSignatureService implemen
         return false;
     }
 
-
-
-
     @Override       // implements SignatureService
     public PublicKey getPublicKey(KeyMetadata keyMetadata) {
         return null;
     }
+
+//    @Override
+//    public KeyStoreType keyStoreType() {return null;}
 }
