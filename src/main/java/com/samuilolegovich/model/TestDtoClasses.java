@@ -22,7 +22,7 @@ public class TestDtoClasses implements Runnable {
         ObjectMapper objectMapper = ObjectMapperFactory.create();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(paymentDto);
 
-        System.out.println("PaymentDto model:\n" + json + "\n");
+        System.out.println("PaymentDto model:\n " + json + "\n");
 
         /*
             Вывод
