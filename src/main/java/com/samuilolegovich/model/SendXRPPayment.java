@@ -25,7 +25,6 @@ import org.xrpl.xrpl4j.model.transactions.Payment;
 import org.xrpl.xrpl4j.model.transactions.Transaction;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
-import org.xrpl.xrpl4j.wallet.SeedWalletGenerationResult;
 import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
@@ -249,11 +248,6 @@ public class SendXRPPayment implements Runnable {
                 }
             }
         }
-
-
-
-
-
     }
 
 
@@ -263,7 +257,7 @@ public class SendXRPPayment implements Runnable {
     private void checkTransactionResults(TransactionResult<Payment> transactionResult, SignedTransaction<Payment> signedPayment) {
         AtomicBoolean flag = new AtomicBoolean(true);
         while (flag.get()) {
-            System.out.println(transactionResult);
+            System.out.println("Transaction Result:\n   " + transactionResult + "\n");
             System.out.println("Explorer link:\n    https://testnet.xrpl.org/transactions/" + signedPayment.hash() + "\n");
 
             transactionResult.metadata().ifPresent(metadata -> {

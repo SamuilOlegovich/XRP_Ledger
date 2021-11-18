@@ -1,5 +1,6 @@
 package com.samuilolegovich;
 
+import com.samuilolegovich.model.RealXRPWallet;
 import com.samuilolegovich.model.SendXRPPayment;
 import com.samuilolegovich.model.TestDtoClasses;
 import com.samuilolegovich.model.StartWorkPayment;
@@ -15,5 +16,6 @@ public class XRPLedgerApplication {
         new TestDtoClasses().run();
         new StartWorkPayment().run();
         new SendXRPPayment().run();
+//        new RealXRPWallet().run();
     }
 }
