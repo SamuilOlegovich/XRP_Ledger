@@ -71,40 +71,28 @@ public final class PaymentManagerXRP {
     // ------------------------------------- TEST WALLET -------------------------------------
 
     public void sendTestPayment(String address, Integer tag, BigDecimal numberOfXRP) {
-        try {
-            if (testWallet == null) {
-                testWallet = new TestWalletXRP();
-                setterTestWallet();
-                testWallet.init();
-            }
-            testWallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
-        } catch (JsonRpcClientErrorException | JsonProcessingException e) {
-            e.printStackTrace();
+        if (testWallet == null) {
+            testWallet = new TestWalletXRP();
+            setterTestWallet();
+            testWallet.init();
         }
+        testWallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
     }
 
     public void connectAnExistingTestWallet(String seed) {
-        try {
-            if (testWallet == null) {
-                testWallet = new TestWalletXRP();
-                setterTestWallet();
-            }
-            testWallet.setSeedKey(seed);
-            testWallet.init();
-        } catch (JsonRpcClientErrorException e) {
-            e.printStackTrace();
+        if (testWallet == null) {
+            testWallet = new TestWalletXRP();
+            setterTestWallet();
         }
+        testWallet.setSeedKey(seed);
+        testWallet.init();
     }
 
     public void createNewTestWallet() {
         if (testWallet == null) {
             testWallet = new TestWalletXRP();
             setterTestWallet();
-            try {
-                testWallet.init();
-            } catch (JsonRpcClientErrorException e) {
-                e.printStackTrace();
-            }
+            testWallet.init();
         }
     }
 
@@ -113,11 +101,7 @@ public final class PaymentManagerXRP {
             createNewTestWallet();
         } else {
             setterTestWallet();
-            try {
-                testWallet.init();
-            } catch (JsonRpcClientErrorException e) {
-                e.printStackTrace();
-            }
+            testWallet.init();
         }
     }
 

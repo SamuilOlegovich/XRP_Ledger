@@ -94,7 +94,7 @@ public class TestWalletXRP {
 
 
 
-    public void init() throws JsonRpcClientErrorException {
+    public void init() {
         // Construct a network client
         // Создайте сетевой клиент
         rippledUrl = HttpUrl.get(xrpHttpUrl);
@@ -143,14 +143,17 @@ public class TestWalletXRP {
                 .ledgerIndex(LedgerIndex.VALIDATED)
                 .account(classicAddress)
                 .build();
-        accountInfoResult = xrplClient.accountInfo(accountInfoRequestParams);
-        System.out.println("Account Info Result\n   " + accountInfoResult. + "\n");
+        try {
+            accountInfoResult = xrplClient.accountInfo(accountInfoRequestParams);
+        } catch (JsonRpcClientErrorException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Account Info Result\n   " + accountInfoResult + "\n");
     }
 
 
 
-    public void sendPaymentToAddressXRP(String address, Integer tag, BigDecimal numberOfXRP) throws
-            JsonRpcClientErrorException, JsonProcessingException {
+    public void sendPaymentToAddressXRP(String address, Integer tag, BigDecimal numberOfXRP) {
         // Prepare transaction --------------------------------------------------------
         // Подготовить транзакцию -----------------------------------------------------
         // Look up your Account Info
@@ -162,16 +165,24 @@ public class TestWalletXRP {
 
         // Request current fee information from rippled
         // Запросить информацию о текущих сборах у rippled
-        FeeResult feeResult = xrplClient.fee();
+        FeeResult feeResult = null;
+        LedgerIndex validatedLedger = null;
+        try {
+            feeResult = xrplClient.fee();
+
+            // Get the latest validated ledger index
+            // Получите последний проверенный индекс бухгалтерской книги
+            validatedLedger = xrplClient.ledger(LedgerRequestParams.builder()
+                    .ledgerIndex(LedgerIndex.VALIDATED).build()).ledgerIndex()
+                    .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
+            System.out.println("Ledger Index:\n " + validatedLedger.toString() + "\n");
+        } catch (JsonRpcClientErrorException e) {
+            e.printStackTrace();
+        }
         XrpCurrencyAmount openLedgerFee = feeResult.drops().openLedgerFee();
 
 
-        // Get the latest validated ledger index
-        // Получите последний проверенный индекс бухгалтерской книги
-        LedgerIndex validatedLedger = xrplClient.ledger(LedgerRequestParams.builder()
-                .ledgerIndex(LedgerIndex.VALIDATED).build()).ledgerIndex()
-                .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
-        System.out.println("Ledger Index:\n " + validatedLedger.toString() + "\n");
+
 
 
         // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
@@ -235,7 +246,13 @@ public class TestWalletXRP {
 
         // Submit transaction ---------------------------------------------------------
         // Отправить транзакцию -------------------------------------------------------
-        SubmitResult<Transaction> prelimResult = xrplClient.submit(signedPayment);
+        SubmitResult<Transaction> prelimResult = null;
+        try {
+            prelimResult = xrplClient.submit(signedPayment);
+            waitForValidationTransaction();
+        } catch (JsonRpcClientErrorException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
         System.out.println("Submit Result Transaction:\n    " + prelimResult + "\n");
         /*
             SubmitResult{
@@ -276,8 +293,6 @@ public class TestWalletXRP {
                 validatedLedgerIndex=22641272
             }
         */
-
-        waitForValidationTransaction();
     }
 
 
@@ -351,7 +366,6 @@ public class TestWalletXRP {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }
