@@ -1,4 +1,4 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.oldCode;
 
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.XrplClient;

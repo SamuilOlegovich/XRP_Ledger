@@ -1,4 +1,4 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.oldCode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samuilolegovich.dto.PaymentDto;

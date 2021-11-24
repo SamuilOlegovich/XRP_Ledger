@@ -1,4 +1,4 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.oldCode;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;

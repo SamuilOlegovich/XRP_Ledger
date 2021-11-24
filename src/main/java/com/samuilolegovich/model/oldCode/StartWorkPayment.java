@@ -1,4 +1,4 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.oldCode;
 
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;

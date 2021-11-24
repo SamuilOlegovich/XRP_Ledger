@@ -4,12 +4,11 @@ import com.samuilolegovich.model.realization.SocketXRP;
 import com.samuilolegovich.model.realization.TestSocketXRP;
 import com.samuilolegovich.model.realization.TestWalletXRP;
 import com.samuilolegovich.model.realization.WalletXRP;
-import lombok.Builder;
 
 import java.math.BigDecimal;
 
 
-@Builder
+
 public final class PaymentManagerXRP {
     private String testFaucetClientHttpUrl;
     private String testHttpUrlConnect;
@@ -43,7 +42,7 @@ public final class PaymentManagerXRP {
         if (wallet == null) {
             wallet = new WalletXRP();
             setterWallet();
-            wallet.init();
+            wallet.createNewWallet();
         }
         wallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
     }
@@ -98,9 +97,11 @@ public final class PaymentManagerXRP {
         return wallet.getPrivateKey();
     }
 
+    public String getSeed() {
+        return wallet.getSeed();
+    }
+
     private void setterWallet() {
-        if (faucetClientHttpUrl != null)
-            wallet.setFaucetClientHttpUrl(faucetClientHttpUrl);
         if (testHttpUrlConnect != null)
             wallet.setXrpHttpUrl(httpUrlConnect);
     }
@@ -165,6 +166,10 @@ public final class PaymentManagerXRP {
 
     public String getTestPrivateSeed() {
         return testWallet.getPrivateKey();
+    }
+
+    public String getTestSeed() {
+        return testWallet.getSeed();
     }
 
     private void setterTestWallet() {
