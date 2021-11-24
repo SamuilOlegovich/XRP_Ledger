@@ -3,6 +3,7 @@ package com.samuilolegovich.model.realization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
+import com.samuilolegovich.model.Addresses;
 import lombok.Builder;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -54,8 +55,8 @@ public class TestWalletXRP {
 
 
     public TestWalletXRP() {
-        this.faucetClientHttpUrl = "https://s.altnet.rippletest.net:51234/";
-        this.xrpHttpUrl = "https://s.altnet.rippletest.net:51234/";
+        this.faucetClientHttpUrl = Addresses.FAUCET_CLIENT_HTTP_URL_TEST;
+        this.xrpHttpUrl = Addresses.XTP_HTTP_URL_ONE_TEST;
         this.seedKey = null;
     }
 

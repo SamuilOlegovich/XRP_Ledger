@@ -1,15 +1,15 @@
 package com.samuilolegovich.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.samuilolegovich.model.realization.SocketXRP;
 import com.samuilolegovich.model.realization.TestSocketXRP;
 import com.samuilolegovich.model.realization.TestWalletXRP;
 import com.samuilolegovich.model.realization.WalletXRP;
-import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 
 
+@Builder
 public final class PaymentManagerXRP {
     private String testFaucetClientHttpUrl;
     private String testHttpUrlConnect;
@@ -33,14 +33,53 @@ public final class PaymentManagerXRP {
         this.httpUrlConnect = null;
     }
 
-    public void sendPayment(String address, String tag, String numberOfXRP) {}
-    public void connectAnExistingWallet(String seed) {}
-    public void createNewWallet() {}
-    public void updateWallet() {}
-    public void startSocket() {}
+
+
+
+
+    // ------------------------------------- REAL WALLET -------------------------------------
+
+    public void sendPayment(String address, Integer tag, BigDecimal numberOfXRP) {
+        if (wallet == null) {
+            wallet = new WalletXRP();
+            setterWallet();
+            wallet.init();
+        }
+        wallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
+    }
+
+    public void connectAnExistingWallet(String seed) {
+        if (wallet == null) {
+            wallet = new WalletXRP();
+            setterWallet();
+        }
+        wallet.setSeedKey(seed);
+        wallet.init();
+    }
+    public void createNewWallet() {
+        if (wallet == null) {
+            wallet = new WalletXRP();
+            setterWallet();
+            wallet.init();
+        }
+    }
+    public void updateWallet() {
+        if (wallet == null) {
+            createNewWallet();
+        } else {
+            setterWallet();
+            wallet.init();
+        }
+    }
+
+    public void startSocket() {
+        if (socket == null) {
+            socket = new SocketXRP();
+        }
+    }
 
     // TO DO тут подумать как лучше это сделать
-    public void monitorAccountReplenishmentXRP(Object o){}
+    public void monitorAccountReplenishmentXRP(Object o) {}
 
 
     public void setFaucetClientHttpUrl(String faucetClientHttpUrl) {
@@ -59,12 +98,14 @@ public final class PaymentManagerXRP {
         return wallet.getPrivateKey();
     }
 
-    private void setterWalletXRP() {
+    private void setterWallet() {
         if (faucetClientHttpUrl != null)
             wallet.setFaucetClientHttpUrl(faucetClientHttpUrl);
         if (testHttpUrlConnect != null)
             wallet.setXrpHttpUrl(httpUrlConnect);
     }
+
+
 
 
 
