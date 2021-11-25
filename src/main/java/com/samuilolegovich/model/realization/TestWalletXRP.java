@@ -3,11 +3,12 @@ package com.samuilolegovich.model.realization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.model.Addresses;
+import com.samuilolegovich.model.TestPaymentManagerXRP;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.client.faucet.FaucetClient;
+import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
@@ -29,7 +30,7 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -48,6 +49,7 @@ public class TestWalletXRP {
     private XAddress xAddress;
     private Wallet wallet;
 
+    private boolean paymentWasSuccessful;
 
     private String faucetClientHttpUrl;
     private String xrpHttpUrl;
@@ -56,37 +58,22 @@ public class TestWalletXRP {
 
 
     public TestWalletXRP() {
-        this.faucetClientHttpUrl = Addresses.FAUCET_CLIENT_HTTP_URL_TEST;
-        this.xrpHttpUrl = Addresses.XTP_HTTP_URL_ONE_TEST;
+        this.xrpHttpUrl = TestPaymentManagerXRP.XTP_HTTP_URL_ONE_TEST;
+        this.paymentWasSuccessful = false;
         this.seedKey = null;
     }
 
-    public TestWalletXRP(String seedKey, String xrpHttpUrl, String faucetClientHttpUrl) {
-        this.faucetClientHttpUrl = faucetClientHttpUrl;
+    public TestWalletXRP(String seedKey, String xrpHttpUrl) {
+        this.paymentWasSuccessful = false;
         this.xrpHttpUrl = xrpHttpUrl;
         this.seedKey = seedKey;
     }
 
 
 
-    public void setFaucetClientHttpUrl(String faucetClientHttpUrl) {
-        this.faucetClientHttpUrl = faucetClientHttpUrl;
-    }
 
     public void setXrpHttpUrl(String xrpHttpUrl) {
         this.xrpHttpUrl = xrpHttpUrl;
-    }
-
-    public void setSeedKey(String seedKey) {
-        this.seedKey = seedKey;
-    }
-
-    public String getPublicAddress() {
-        return wallet.classicAddress().toString();
-    }
-
-    public String getPrivateKey() {
-        return wallet.xAddress().toString();
     }
 
     public String getSeed() {
@@ -94,8 +81,29 @@ public class TestWalletXRP {
         return "Это не новый кошелек, у вас уже есть востановительная фраза";
     }
 
+    public String getClassicAddress() {
+        return wallet.classicAddress().toString();
+    }
 
-    public List<String> createNewWallet() {
+    public String getXAddress() {
+        return wallet.xAddress().toString();
+    }
+
+    public String getPrivateKey() {
+        return wallet.privateKey().get();
+    }
+
+    public String getPublicKey() {
+        return wallet.publicKey();
+    }
+
+
+
+
+
+
+
+    public Map<String, String> createNewWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
         generationResult = walletFactory.randomWallet(false);
         wallet = generationResult.wallet();
@@ -107,12 +115,21 @@ public class TestWalletXRP {
         }
 
         classicAddress = wallet.classicAddress();
-        return null;
+        replenishBalanceWallet();
+
+        return Map.of(
+                "Seed", getSeed(),
+                "Public Key", getPublicKey(),
+                "Private Key", getPrivateKey(),
+                "Classic Address", getClassicAddress(),
+                "X Address", getXAddress(),
+                "Balance", accountInfoResult.accountData().balance().toString()
+        );
     }
 
 
 
-    public void restoreWallet(String seed) {
+    public Map<String, String> restoreWallet(String seed) {
         seedKey = seed;
         walletFactory = DefaultWalletFactory.getInstance();
         wallet = walletFactory.fromSeed(seedKey, true);
@@ -125,6 +142,35 @@ public class TestWalletXRP {
         // Получите классический адрес из wallet
         classicAddress = wallet.classicAddress();
         System.out.println("Classic Address:\n  " + classicAddress + "\n");
+        replenishBalanceWallet();
+
+        return Map.of(
+                "Public Key", getPublicKey(),
+                "Private Key", getPrivateKey(),
+                "Classic Address", getClassicAddress(),
+                "X Address", getXAddress(),
+                "Balance", accountInfoResult.accountData().balance().toString()
+        );
+    }
+
+
+    // пополняем тестовый счет
+    private void replenishBalanceWallet() {
+        try {
+            // Fund the account using the testnet Faucet
+            // Пополните счет с помощью Testnet Faucet
+            FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(TestPaymentManagerXRP.FAUCET_CLIENT_HTTP_URL_TEST));
+            faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
+
+
+            // Look up your Account Info
+            // Посмотрите информацию о своей учетной записи
+            accountInfoRequestParams = AccountInfoRequestParams.of(classicAddress);
+            accountInfoResult = xrplClient.accountInfo(accountInfoRequestParams);
+            System.out.println("Account Info Result\n   " + accountInfoResult + "\n");
+        } catch (JsonRpcClientErrorException e) {
+            e.printStackTrace();
+        }
     }
 
 

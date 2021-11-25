@@ -3,7 +3,7 @@ package com.samuilolegovich.model.realization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.model.Addresses;
+import com.samuilolegovich.model.PaymentManagerXRP;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -28,7 +28,7 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -44,20 +44,25 @@ public class WalletXRP {
     private HttpUrl rippledUrl;
     private Wallet wallet;
 
+    private boolean paymentWasSuccessful;
 
     private String xrpHttpUrl;
     private String seedKey;
 
 
+
     public WalletXRP() {
-        this.xrpHttpUrl = Addresses.XTP_HTTP_URL_ONE;
+        this.xrpHttpUrl = PaymentManagerXRP.XTP_HTTP_URL_ONE;
+        this.paymentWasSuccessful = false;
         this.seedKey = null;
     }
 
-    public WalletXRP(String seedKey, String xrpHttpUrl, String faucetClientHttpUrl) {
+    public WalletXRP(String seedKey, String xrpHttpUrl) {
+        this.paymentWasSuccessful = false;
         this.xrpHttpUrl = xrpHttpUrl;
         this.seedKey = seedKey;
     }
+
 
 
 
@@ -65,26 +70,34 @@ public class WalletXRP {
         this.xrpHttpUrl = xrpHttpUrl;
     }
 
-    public void setSeedKey(String seedKey) {
-        this.seedKey = seedKey;
-    }
-
-    public String getPublicAddress() {
-        return wallet.classicAddress().toString();
-    }
-
-    public String getPrivateKey() {
-        return wallet.xAddress().toString();
-    }
-
     public String getSeed() {
         if (generationResult != null) return generationResult.seed();
         return "Это не новый кошелек, у вас уже есть востановительная фраза";
     }
 
+    public String getClassicAddress() {
+        return wallet.classicAddress().toString();
+    }
+
+    public String getXAddress() {
+        return wallet.xAddress().toString();
+    }
+
+    public String getPrivateKey() {
+        return wallet.privateKey().get();
+    }
+
+    public String getPublicKey() {
+        return wallet.publicKey();
+    }
 
 
-    public List<String> createNewWallet() {
+
+
+
+
+
+    public Map<String, String> createNewWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
         generationResult = walletFactory.randomWallet(false);
         wallet = generationResult.wallet();
@@ -96,27 +109,34 @@ public class WalletXRP {
         }
 
         classicAddress = wallet.classicAddress();
-        return null;
+
+        return Map.of(
+                "Seed", getSeed(),
+                "Public Key", getPublicKey(),
+                "Private Key", getPrivateKey(),
+                "Classic Address", getClassicAddress(),
+                "X Address", getXAddress()
+        );
     }
 
 
 
-    public void restoreWallet(String seed) {
+    public Map<String, String> restoreWallet(String seed) {
         seedKey = seed;
         walletFactory = DefaultWalletFactory.getInstance();
         wallet = walletFactory.fromSeed(seedKey, true);
-        System.out.println("Wallet:\n   " + "public key -> " + wallet.publicKey() + "\n"
-                + "     Classic Address -> " + wallet.classicAddress() + "\n"
-                + "     X Address -> " + wallet.xAddress() + "\n"
-                + "     Private Key -> " + wallet.privateKey().toString() + "\n");
 
         // Get the Classic address from wallet
         // Получите классический адрес из wallet
         classicAddress = wallet.classicAddress();
-        System.out.println("Classic Address:\n  " + classicAddress + "\n");
+
+        return Map.of(
+                "Public Key", getPublicKey(),
+                "Private Key", getPrivateKey(),
+                "Classic Address", getClassicAddress(),
+                "X Address", getXAddress()
+        );
     }
-
-
 
 
 

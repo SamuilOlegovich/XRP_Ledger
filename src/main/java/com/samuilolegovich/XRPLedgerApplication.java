@@ -1,17 +1,19 @@
 package com.samuilolegovich;
 
 import com.samuilolegovich.model.*;
-import com.samuilolegovich.model.oldCode.SendXRPPayment;
+import com.samuilolegovich.model.oldCode.StartWorkPayment;
 
-import java.math.BigDecimal;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class XRPLedgerApplication {
+    // REAL
     private static PaymentManagerXRP paymentManagerXRP = null;
     private static PaymentManagerXRP paymentManagerXRPTwo = null;
-    private static PaymentManagerXRP paymentManagerXRPThree = null;
-    private static PaymentManagerXRP paymentManagerXRPFour = null;
+    // TEST
+    private static TestPaymentManagerXRP testPaymentManagerXRPOne = null;
+    private static TestPaymentManagerXRP testPaymentManagerXRPTwo = null;
 
 
 
@@ -20,18 +22,13 @@ public class XRPLedgerApplication {
         Locale.setDefault(Locale.ENGLISH);
 
 //        new TestDtoClasses().run();
-//        new StartWorkPayment().run();
+        new StartWorkPayment().run();
 //        new SendXRPPayment().run();
 //        new RealXRPWallet().run();
 
 
-        startTest();
+//        startTest();
 //        startReal();
-
-
-
-
-
     }
 
 
@@ -39,44 +36,49 @@ public class XRPLedgerApplication {
         // ----------------------------- REAL -----------------------------
         paymentManagerXRP = new PaymentManagerXRP();
         paymentManagerXRPTwo = new PaymentManagerXRP();
-//
-        paymentManagerXRP.createNewWallet();
+
+        Map<String, String> map = paymentManagerXRP.createNewWallet();
         String seed = paymentManagerXRP.getSeed();
         System.out.println("SEED\n" + seed + "\n");
 
-        System.out.println("----------------------------- TEST ONE -----------------------------");
-        System.out.println("Test Private Seed\n " + paymentManagerXRP.getPrivateSeed() + "\n");
-        System.out.println("Test Public Address\n " + paymentManagerXRP.getPublicAddress() + "\n");
+        System.out.println("----------------------------- TEST ONE REAL-----------------------------");
+        System.out.println("Test Private Seed\n " + paymentManagerXRP.getPrivateKey() + "\n");
+        System.out.println("Test Public Address\n " + paymentManagerXRP.getClassicAddress() + "\n");
+
+        Map<String, String> stringMap = paymentManagerXRPTwo.connectAnExistingWallet(paymentManagerXRP.getSeed());
+
+        System.out.println("----------------------------- TEST TWO REAL -----------------------------");
+        System.out.println("Test Private Seed\n " + paymentManagerXRPTwo.getPrivateKey() + "\n");
+        System.out.println("Test Public Address\n " + paymentManagerXRPTwo.getClassicAddress() + "\n");
 
 //        paymentManagerXRP.sendPayment("ra3GsPkHcLf3TS7asKXqzVAx2wR6mvaFs5", 777, BigDecimal.ONE);
-
-        paymentManagerXRPTwo.connectAnExistingWallet(paymentManagerXRP.getSeed());
-
-        System.out.println("----------------------------- TEST TWO -----------------------------");
-        System.out.println("Test Private Seed\n " + paymentManagerXRPTwo.getPrivateSeed() + "\n");
-        System.out.println("Test Public Address\n " + paymentManagerXRPTwo.getPublicAddress() + "\n");
     }
 
     private static void startTest() {
         // ----------------------------- TEST -----------------------------
-        paymentManagerXRPThree = new PaymentManagerXRP();
-        paymentManagerXRPFour = new PaymentManagerXRP();
-//
-        paymentManagerXRPThree.createNewTestWallet();
-        String seedTest = paymentManagerXRPThree.getTestSeed();
+        // создаем менеджеры платежей
+        testPaymentManagerXRPOne = new TestPaymentManagerXRP();
+        testPaymentManagerXRPTwo = new TestPaymentManagerXRP();
+
+        // создаем новый тестовый кошелек и получаем востановительную сид фразу
+        Map<String, String> map = testPaymentManagerXRPOne.createNewTestWallet();
+        String seedTest = testPaymentManagerXRPOne.getTestSeed();
         System.out.println("SEED TEST\n" + seedTest + "\n");
 
-        System.out.println("----------------------------- TEST ONE -----------------------------");
-        System.out.println("Test Private Seed\n " + paymentManagerXRPThree.getTestPrivateSeed() + "\n");
-        System.out.println("Test Public Address\n " + paymentManagerXRPThree.getTestPublicAddress() + "\n");
+        System.out.println("----------------------------- TEST ONE TEST -----------------------------");
+        System.out.println("Test Private Seed\n " + testPaymentManagerXRPOne.getTestPrivateKey() + "\n");
+        System.out.println("Test Public Address\n " + testPaymentManagerXRPOne.getTestClassicAddress() + "\n");
+
+
+        // востанавливаем кошелек из полученой востановительной фразы и проверяем его выводимые данные на совпадение
+        Map<String, String> stringMap = testPaymentManagerXRPTwo.connectAnExistingTestWallet(testPaymentManagerXRPOne.getTestSeed());
+
+        System.out.println("----------------------------- TEST TWO TEST -----------------------------");
+        System.out.println("Test Private Seed\n " + testPaymentManagerXRPTwo.getTestPrivateKey() + "\n");
+        System.out.println("Test Public Address\n " + testPaymentManagerXRPTwo.getTestClassicAddress() + "\n");
+
 
 //        paymentManagerXRPThree.sendPayment("ra3GsPkHcLf3TS7asKXqzVAx2wR6mvaFs5", 777, BigDecimal.ONE);
-
-        paymentManagerXRPFour.connectAnExistingTestWallet(paymentManagerXRPThree.getTestSeed());
-
-        System.out.println("----------------------------- TEST TWO -----------------------------");
-        System.out.println("Test Private Seed\n " + paymentManagerXRPFour.getTestPrivateSeed() + "\n");
-        System.out.println("Test Public Address\n " + paymentManagerXRPFour.getTestPublicAddress() + "\n");
     }
 }
 
