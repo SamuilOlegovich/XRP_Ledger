@@ -30,6 +30,8 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -99,6 +101,39 @@ public class TestWalletXRP {
 
 
 
+    private final static String RESULT = "result";
+    private final static String SUCCESS = "success";
+    private final static String TES_SUCCESS = "tesSUCCESS";
+    private final static String METHOD_GET_TRANSACTION = "/v2/accounts/{0}/transactions";
+    private final static String METHOD_GET_BALANCE = "/v2/accounts/{0}/balances";
+    private final static String METHOD_POST_SIGN = "sign";
+
+
+
+    public double getBalance(){
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("currency", CoinConstant.COIN_XRP);
+        String re = HttpUtil.jsonGet(getUrl + MessageFormat.format(METHOD_GET_BALANCE, address), params);
+        if(!StringUtils.isEmpty(re)){
+            JSONObject json = JSON.parseObject(re);
+            if (SUCCESS.equals(json.getString(RESULT))) {
+                JSONArray array = json.getJSONArray("balances");
+                if (array != null && array.size() > 0) {
+                    // Общий баланс
+                    double balance = array.getJSONObject(0).getDoubleValue("value");
+                    if (balance >= 20) {
+                        // Доступный баланс xrp заморозит 20 монет
+                        return BigDecimalUtil.sub(balance, 20);
+                    }
+                }
+            }
+        }
+        return 0.00;
+    }
+
+
+
+
 
 
 
@@ -161,7 +196,7 @@ public class TestWalletXRP {
             // Пополните счет с помощью Testnet Faucet
             FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(TestPaymentManagerXRP.FAUCET_CLIENT_HTTP_URL_TEST));
             faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
-
+            createConnect();
 
             // Look up your Account Info
             // Посмотрите информацию о своей учетной записи
@@ -173,15 +208,25 @@ public class TestWalletXRP {
         }
     }
 
+    private void createConnect() {
+        try {
+            // Connect --------------------------------------------------------
+            // Соединять ------------------------------------------------------
+            rippledUrl = HttpUrl.get(xrpHttpUrl);
+            xrplClient = new XrplClient(rippledUrl);
+            System.out.println("Server Info\n   " + xrplClient.serverInfo().toString() + "\n");
+        } catch (JsonRpcClientErrorException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public void sendPaymentToAddressXRP(String address, Integer tag, BigDecimal numberOfXRP) {
         try {
             // Connect --------------------------------------------------------
             // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(xrpHttpUrl);
-            xrplClient = new XrplClient(rippledUrl);
-            System.out.println(xrplClient.serverInfo().toString());
+            createConnect();
 
             // Prepare transaction --------------------------------------------------------
             // Подготовить транзакцию -----------------------------------------------------
@@ -191,7 +236,8 @@ public class TestWalletXRP {
                     .ledgerIndex(LedgerIndex.VALIDATED)
                     .account(classicAddress)
                     .build();
-            accountInfoResult = xrplClient.accountInfo(requestParams);
+            // ??????????????? JsonRpcClientErrorException ???????????????
+//            accountInfoResult = xrplClient.accountInfo(requestParams);
             UnsignedInteger sequence = accountInfoResult.accountData().sequence();
             System.out.println("Account Info Request Params:\n  " + requestParams.account() + "\n");
             System.out.println("Unsigned Integer:\n " + sequence.toString() + "\n");
@@ -245,6 +291,7 @@ public class TestWalletXRP {
             System.out.println("Private Key:\n  " + privateKey + "\n");
 
             // Sign the Payment
+            // Подпишите платеж
             signedPayment = signatureService.sign(KeyMetadata.EMPTY, payment);
             System.out.println("Signed Payment:\n   " + signedPayment.signedTransaction() + "\n");
 
@@ -252,9 +299,12 @@ public class TestWalletXRP {
             // Submit transaction ---------------------------------------------------------
             // Отправить транзакцию -------------------------------------------------------
             SubmitResult<Transaction> prelimResult = xrplClient.submit(signedPayment);
-            System.out.println("Submit Result Transaction:\n    " + prelimResult + "\n");
+            System.out.println("Submit Result Transaction:\n    " + prelimResult.toString() + "\n");
             waitForValidationTransaction();
-        } catch (JsonRpcClientErrorException | JsonProcessingException e) {}
+
+        } catch (JsonRpcClientErrorException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -296,6 +346,7 @@ public class TestWalletXRP {
                     transactionExpired = true;
                     // Check transaction results --------------------------------------------------
                     // Проверить результаты транзакции --------------------------------------------
+                    // зависает в итоге и ни к чему не приводит - надо проверить на реальном счете, может к тесту не применимо
 //                    checkTransactionResults(transactionResult, signedPayment);
                 } else {
                     // Платеж еще не подтвержден
@@ -311,6 +362,7 @@ public class TestWalletXRP {
     // Проверить результаты транзакции --------------------------------------------
     private void checkTransactionResults(TransactionResult<Payment> transactionResult, SignedTransaction<Payment> signedPayment) {
         AtomicBoolean flag = new AtomicBoolean(true);
+
         while (flag.get()) {
             System.out.println("Transaction Result:\n   " + transactionResult + "\n");
             System.out.println("Explorer link:\n    https://testnet.xrpl.org/transactions/" + signedPayment.hash() + "\n");

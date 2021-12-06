@@ -9,8 +9,9 @@ import java.util.Map;
 
 public final class PaymentManagerXRP {
     // REAL
-    public static String XTP_HTTP_URL_ONE = "https://s1.ripple.com:51234/";
-    public static String XTP_HTTP_URL_TWO = "https://s2.ripple.com:51234/";
+    public static String POST_URL_TWO = "https://s2.ripple.com:51234/";
+    public static String POST_URL = "https://s1.ripple.com:51234/";
+    public static String GET_URL = "https://data.ripple.com";
 
     private String faucetClientHttpUrl;
     private String httpUrlConnect;

@@ -1,8 +1,10 @@
 package com.samuilolegovich;
 
 import com.samuilolegovich.model.*;
+import com.samuilolegovich.model.oldCode.SendXRPPayment;
 import com.samuilolegovich.model.oldCode.StartWorkPayment;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Map;
 
@@ -22,12 +24,12 @@ public class XRPLedgerApplication {
         Locale.setDefault(Locale.ENGLISH);
 
 //        new TestDtoClasses().run();
-        new StartWorkPayment().run();
+//        new StartWorkPayment().run();
 //        new SendXRPPayment().run();
 //        new RealXRPWallet().run();
 
 
-//        startTest();
+        startTest();
 //        startReal();
     }
 
@@ -63,7 +65,7 @@ public class XRPLedgerApplication {
         // создаем новый тестовый кошелек и получаем востановительную сид фразу
         Map<String, String> map = testPaymentManagerXRPOne.createNewTestWallet();
         String seedTest = testPaymentManagerXRPOne.getTestSeed();
-        System.out.println("SEED TEST\n" + seedTest + "\n");
+        System.out.println("SEED TEST\n " + seedTest + "\n");
 
         System.out.println("----------------------------- TEST ONE TEST -----------------------------");
         System.out.println("Test Private Seed\n " + testPaymentManagerXRPOne.getTestPrivateKey() + "\n");
@@ -78,7 +80,7 @@ public class XRPLedgerApplication {
         System.out.println("Test Public Address\n " + testPaymentManagerXRPTwo.getTestClassicAddress() + "\n");
 
 
-//        paymentManagerXRPThree.sendPayment("ra3GsPkHcLf3TS7asKXqzVAx2wR6mvaFs5", 777, BigDecimal.ONE);
+        testPaymentManagerXRPTwo.sendTestPayment("ra3GsPkHcLf3TS7asKXqzVAx2wR6mvaFs5", 777, BigDecimal.ONE);
     }
 }
 

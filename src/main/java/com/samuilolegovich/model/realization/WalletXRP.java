@@ -52,7 +52,7 @@ public class WalletXRP {
 
 
     public WalletXRP() {
-        this.xrpHttpUrl = PaymentManagerXRP.XTP_HTTP_URL_ONE;
+        this.xrpHttpUrl = PaymentManagerXRP.POST_URL;
         this.paymentWasSuccessful = false;
         this.seedKey = null;
     }
