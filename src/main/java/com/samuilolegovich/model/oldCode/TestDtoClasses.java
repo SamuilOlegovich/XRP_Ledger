@@ -1,4 +1,4 @@
-package com.samuilolegovich.model.oldCode;
+package com.samuilolegovich.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samuilolegovich.dto.PaymentDto;
@@ -8,21 +8,22 @@ import org.xrpl.xrpl4j.model.jackson.ObjectMapperFactory;
 
 @NoArgsConstructor
 public class TestDtoClasses implements Runnable {
+    private PaymentDto paymentDto;
+    private ObjectMapper objectMapper;
+    private String stringJson;
 
     @Override
     @SneakyThrows
     public void run() {
-        PaymentDto paymentDto = PaymentDto.builder()
+        paymentDto = PaymentDto.builder()
                 .destination("rUCzEr6jrEyMpjhs4wSdQdz4g8Y382NxfM")
                 .account("rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe")
                 .transactionType("Payment")
                 .amount("2000000")
                 .build();
 
-        ObjectMapper objectMapper = ObjectMapperFactory.create();
-        String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(paymentDto);
-
-        System.out.println("PaymentDto model:\n " + json + "\n");
+        objectMapper = ObjectMapperFactory.create();
+        stringJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(paymentDto);
 
         /*
             Вывод
@@ -33,5 +34,6 @@ public class TestDtoClasses implements Runnable {
                     "destination" : "rUCzEr6jrEyMpjhs4wSdQdz4g8Y382NxfM"
                 }
         */
+        System.out.println("PaymentDto model:  -->  \n" + stringJson + "\n");
     }
 }

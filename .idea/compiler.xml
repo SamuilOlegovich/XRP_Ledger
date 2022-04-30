@@ -8,6 +8,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="XRP_Ledger" />
+        <module name="XRP_Leger" />
+        <module name="XRPLeger" />
       </profile>
     </annotationProcessing>
   </component>
