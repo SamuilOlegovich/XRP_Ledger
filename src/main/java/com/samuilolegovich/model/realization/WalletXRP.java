@@ -3,7 +3,7 @@ package com.samuilolegovich.model.realization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.model.PaymentManagerXRP;
+import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;

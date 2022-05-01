@@ -3,7 +3,7 @@ package com.samuilolegovich.model.realization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.model.TestPaymentManagerXRP;
+import com.samuilolegovich.model.PaymentManager.PaymentManagerXRPTest;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -30,14 +30,12 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 
-public class TestWalletXRP {
+public class WalletXRPTest {
     private AccountInfoRequestParams accountInfoRequestParams;
     private SeedWalletGenerationResult generationResult;
     private SignedTransaction<Payment> signedPayment;
@@ -59,13 +57,13 @@ public class TestWalletXRP {
 
 
 
-    public TestWalletXRP() {
-        this.xrpHttpUrl = TestPaymentManagerXRP.XTP_HTTP_URL_ONE_TEST;
+    public WalletXRPTest() {
+        this.xrpHttpUrl = PaymentManagerXRPTest.XTP_HTTP_URL_ONE_TEST;
         this.paymentWasSuccessful = false;
         this.seedKey = null;
     }
 
-    public TestWalletXRP(String seedKey, String xrpHttpUrl) {
+    public WalletXRPTest(String seedKey, String xrpHttpUrl) {
         this.paymentWasSuccessful = false;
         this.xrpHttpUrl = xrpHttpUrl;
         this.seedKey = seedKey;
@@ -110,26 +108,26 @@ public class TestWalletXRP {
 
 
 
-    public double getBalance(){
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("currency", CoinConstant.COIN_XRP);
-        String re = HttpUtil.jsonGet(getUrl + MessageFormat.format(METHOD_GET_BALANCE, address), params);
-        if(!StringUtils.isEmpty(re)){
-            JSONObject json = JSON.parseObject(re);
-            if (SUCCESS.equals(json.getString(RESULT))) {
-                JSONArray array = json.getJSONArray("balances");
-                if (array != null && array.size() > 0) {
-                    // Общий баланс
-                    double balance = array.getJSONObject(0).getDoubleValue("value");
-                    if (balance >= 20) {
-                        // Доступный баланс xrp заморозит 20 монет
-                        return BigDecimalUtil.sub(balance, 20);
-                    }
-                }
-            }
-        }
-        return 0.00;
-    }
+//    public double getBalance(){
+//        HashMap<String, String> params = new HashMap<String, String>();
+//        params.put("currency", CoinConstant.COIN_XRP);
+//        String re = HttpUtil.jsonGet(getUrl + MessageFormat.format(METHOD_GET_BALANCE, address), params);
+//        if(!StringUtils.isEmpty(re)){
+//            JSONObject json = JSON.parseObject(re);
+//            if (SUCCESS.equals(json.getString(RESULT))) {
+//                JSONArray array = json.getJSONArray("balances");
+//                if (array != null && array.size() > 0) {
+//                    // Общий баланс
+//                    double balance = array.getJSONObject(0).getDoubleValue("value");
+//                    if (balance >= 20) {
+//                        // Доступный баланс xrp заморозит 20 монет
+//                        return BigDecimalUtil.sub(balance, 20);
+//                    }
+//                }
+//            }
+//        }
+//        return 0.00;
+//    }
 
 
 
@@ -194,7 +192,7 @@ public class TestWalletXRP {
         try {
             // Fund the account using the testnet Faucet
             // Пополните счет с помощью Testnet Faucet
-            FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(TestPaymentManagerXRP.FAUCET_CLIENT_HTTP_URL_TEST));
+            FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(PaymentManagerXRPTest.FAUCET_CLIENT_HTTP_URL_TEST));
             faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
             createConnect();
 

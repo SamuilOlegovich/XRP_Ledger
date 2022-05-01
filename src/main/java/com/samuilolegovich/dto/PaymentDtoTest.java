@@ -1,15 +1,14 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.samuilolegovich.dto.PaymentDto;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.xrpl.xrpl4j.model.jackson.ObjectMapperFactory;
 
 @NoArgsConstructor
-public class TestDtoClasses implements Runnable {
-    private PaymentDto paymentDto;
+public class PaymentDtoTest implements Runnable {
     private ObjectMapper objectMapper;
+    private PaymentDto paymentDto;
     private String stringJson;
 
     @Override
@@ -25,7 +24,11 @@ public class TestDtoClasses implements Runnable {
         objectMapper = ObjectMapperFactory.create();
         stringJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(paymentDto);
 
-        /*
+        System.out.println("PaymentDto model:  -->  \n" + stringJson + "\n");
+    }
+}
+
+/*
             Вывод
                 {
                     "transactionType" : "Payment",
@@ -33,7 +36,4 @@ public class TestDtoClasses implements Runnable {
                     "amount" : "2000000",
                     "destination" : "rUCzEr6jrEyMpjhs4wSdQdz4g8Y382NxfM"
                 }
-        */
-        System.out.println("PaymentDto model:  -->  \n" + stringJson + "\n");
-    }
-}
+*/

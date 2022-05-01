@@ -1,4 +1,4 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.PaymentManager;
 
 import com.samuilolegovich.model.realization.SocketXRP;
 import com.samuilolegovich.model.realization.WalletXRP;

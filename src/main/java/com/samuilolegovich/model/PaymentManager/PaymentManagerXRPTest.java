@@ -1,14 +1,14 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.PaymentManager;
 
-import com.samuilolegovich.model.realization.TestSocketXRP;
-import com.samuilolegovich.model.realization.TestWalletXRP;
+import com.samuilolegovich.model.realization.SocketXRPTest;
+import com.samuilolegovich.model.realization.WalletXRPTest;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 
 
-public final class TestPaymentManagerXRP {
+public final class PaymentManagerXRPTest {
     // TEST
     public static String FAUCET_CLIENT_HTTP_URL_TEST = "https://faucet.altnet.rippletest.net";
     public static String XTP_HTTP_URL_ONE_TEST = "https://s.altnet.rippletest.net:51234/";
@@ -16,12 +16,12 @@ public final class TestPaymentManagerXRP {
     private String faucetClientHttpUrl;
     private String httpUrlConnect;
 
-    private TestWalletXRP wallet;
-    private TestSocketXRP socket;
+    private WalletXRPTest wallet;
+    private SocketXRPTest socket;
 
 
 
-    public TestPaymentManagerXRP() {
+    public PaymentManagerXRPTest() {
         this.faucetClientHttpUrl = null;
         this.httpUrlConnect = null;
     }
@@ -35,12 +35,12 @@ public final class TestPaymentManagerXRP {
     }
 
     public Map<String, String> connectAnExistingTestWallet(String seed) {
-        if (wallet == null) wallet = new TestWalletXRP();
+        if (wallet == null) wallet = new WalletXRPTest();
         return wallet.restoreWallet(seed);
     }
 
     public Map<String, String> createNewTestWallet() {
-        if (wallet == null) wallet = new TestWalletXRP();
+        if (wallet == null) wallet = new WalletXRPTest();
         return wallet.createNewWallet();
     }
 
@@ -49,7 +49,7 @@ public final class TestPaymentManagerXRP {
     }
 
     public void startTestSocket(){
-        socket = new TestSocketXRP();
+        socket = new SocketXRPTest();
     }
 
     // тут подумать как лучше это сделать

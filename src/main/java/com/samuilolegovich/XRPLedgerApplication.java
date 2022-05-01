@@ -1,8 +1,8 @@
 package com.samuilolegovich;
 
-import com.samuilolegovich.enums.Enums;
-import com.samuilolegovich.model.TestDtoClasses;
-import com.samuilolegovich.model.TestPayment;
+import com.samuilolegovich.dto.PaymentDtoTest;
+import com.samuilolegovich.model.payment.PaymentReal;
+import com.samuilolegovich.model.payment.PaymentTest;
 
 import java.util.Locale;
 
@@ -13,8 +13,8 @@ public class XRPLedgerApplication {
         // Обязательно стоит установить локаль иначе будет падать с ошибкой парсинга даты
         Locale.setDefault(Locale.ENGLISH);
 
-//        new TestDtoClasses().run();
-//        new TestPayment().run();
+//        new PaymentTest().run();
+//        new PaymentReal().run();
 
     }
 }

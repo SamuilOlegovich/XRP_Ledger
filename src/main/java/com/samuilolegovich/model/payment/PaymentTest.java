@@ -1,8 +1,7 @@
-package com.samuilolegovich.model;
+package com.samuilolegovich.model.payment;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -17,20 +16,25 @@ import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.fees.FeeResult;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.client.transactions.SubmitResult;
+import org.xrpl.xrpl4j.model.client.transactions.TransactionRequestParams;
+import org.xrpl.xrpl4j.model.client.transactions.TransactionResult;
+import org.xrpl.xrpl4j.model.immutables.FluentCompareTo;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.Payment;
 import org.xrpl.xrpl4j.model.transactions.Transaction;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
+import org.xrpl.xrpl4j.wallet.SeedWalletGenerationResult;
 import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.samuilolegovich.enums.Enums.*;
 
-@NoArgsConstructor
-public class TestPayment implements Runnable {
+public class PaymentTest implements Runnable {
+    private SeedWalletGenerationResult generationResult;
     private AccountInfoRequestParams requestParams;
     private AccountInfoResult accountInfoResult;
     private UnsignedInteger lastLedgerSequence;
@@ -44,9 +48,10 @@ public class TestPayment implements Runnable {
     private XrplClient xrplClient;
     private FeeResult feeResult;
     private HttpUrl rippledUrl;
-    private Wallet wallet;
     private Payment payment;
-    private boolean isReal;
+    private Wallet wallet;
+
+    private boolean isWallet;
 
     private SignedTransaction<Payment> signedPayment;
     private SubmitResult<Transaction> prelimResult;
@@ -54,12 +59,24 @@ public class TestPayment implements Runnable {
     @SneakyThrows
     @Override
     public void run() {
-        isReal = TEST_OR_REAL_NET.value.equalsIgnoreCase(REAL_NET.toString());
+        // Определяем есть ли у нас сид фраза для кошелька или стоит сгенирировать новый
+        isWallet = IS_WALLET.value.equalsIgnoreCase("true");
+
+
 
         // Пример учетных данных ***************************************************************************************
         // Получить учетные данные
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(isReal ? REAL_SEED.value : TEST_SEED.value, true);
+
+        // Если кошелька не существует то генерируем новый, если есть то востанавливаем его из сид фразы
+        if (isWallet) {
+            generationResult = walletFactory.randomWallet(false);
+            wallet = generationResult.wallet();
+            System.out.println(wallet.classicAddress()); // Example: rGCkuB7PBr5tNy68tPEABEtcdno4hE6Y7f
+            System.out.println(generationResult.seed()); // Example: sp6JS7f14BuwFY8Mw6bTtLKWauoUs
+        } else {
+            wallet = walletFactory.fromSeed(TEST_SEED.value, true);
+        }
 
 
         // Получите классический адрес из testWallet
@@ -70,7 +87,7 @@ public class TestPayment implements Runnable {
 
 
         // Подключение к серверу Testnet *******************************************************************************
-        rippledUrl = HttpUrl.get(isReal ? REAL_NET.value : TEST_NET.value);
+        rippledUrl = HttpUrl.get(TEST_NET.value);
         xrplClient = new XrplClient(rippledUrl);
 
         // Выдаст - HardCodedTarget(type=JsonRpcClient, url=https://s.altnet.rippletest.net:51234/) (test)
@@ -113,14 +130,14 @@ public class TestPayment implements Runnable {
         payment = Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(isReal ? REAL_ADDRESS.value : TEST_ADDRESS.value))
+                .destination(Address.of(TEST_ADDRESS.value))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())
                 .lastLedgerSequence(lastLedgerSequence)
                 .build();
 
-        System.out.println("Constructed Payment:\n" + payment + "\n");
+        System.out.println("Constructed Payment:  -- >  " + payment + "\n");
 
 
         // Подписать транзакцию ****************************************************************************************
@@ -140,5 +157,83 @@ public class TestPayment implements Runnable {
         System.out.println("Prelim Result:  -- >  " + prelimResult);
 
 
+
+
+
+
+        // ******************* ПЕРЕСМОТРЕТЬ И ПЕРЕОСМЫСЛИТЬ ЭТОТ КОД **************************************************
+
+        // Wait for validation
+        // Подождите подтверждения *************************************************************************************
+        boolean transactionValidated = false;
+        boolean transactionExpired = false;
+
+        while (!transactionValidated && !transactionExpired) {
+            Thread.sleep(4 * 1000);
+
+            LedgerIndex latestValidatedLedgerIndex = xrplClient.ledger(
+                    LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build()
+            ).ledgerIndex().orElseThrow(() -> new RuntimeException("Ledger response did not contain a LedgerIndex."));
+
+            TransactionResult<Payment> transactionResult = xrplClient.transaction(
+                    TransactionRequestParams.of(signedPayment.hash()), Payment.class
+            );
+
+            if (transactionResult.validated()) {
+                // Payment confirmed by result code
+                // Платеж подтвержден кодом результата
+                System.out.println("Payment was validated with result code:\n   "
+                        + transactionResult.metadata().get().transactionResult() + "\n");
+                transactionValidated = true;
+            } else {
+                boolean lastLedgerSequenceHasPassed = FluentCompareTo.
+                        is(latestValidatedLedgerIndex.unsignedLongValue())
+                        .greaterThan(UnsignedLong.valueOf(lastLedgerSequence.intValue()));
+                if (lastLedgerSequenceHasPassed) {
+                    // LastLedgerSequence прошел. Последний ответ tx
+                    System.out.println("LastLedgerSequence has passed. Last tx response:\n  " + transactionResult + "\n");
+                    transactionExpired = true;
+                    // Check transaction results --------------------------------------------------
+                    // Проверить результаты транзакции --------------------------------------------
+                    checkTransactionResults(transactionResult, signedPayment);
+                } else {
+                    // Платеж еще не подтвержден
+                    System.out.println("Payment not yet validated.\n");
+                }
+            }
+        }
+    }
+
+
+
+    // Check transaction results
+    // Проверить результаты транзакции *********************************************************************************
+    private void checkTransactionResults(TransactionResult<Payment> transactionResult,
+                                         SignedTransaction<Payment> signedPayment) {
+
+        AtomicBoolean flag = new AtomicBoolean(true);
+
+        while (flag.get()) {
+            System.out.println("Transaction Result:  -- >  " + transactionResult + "\n");
+            System.out.println("Explorer link:  -- >  https://testnet.xrpl.org/transactions/"
+                    + signedPayment.hash() + "\n");
+
+            transactionResult.metadata().ifPresent(metadata -> {
+                System.out.println("Result code:  -- >  "
+                        + metadata.transactionResult() + "\n");
+
+                metadata.deliveredAmount().ifPresent(deliveredAmount ->
+                        System.out.println("XRP Delivered:  -- >  "
+                                + ((XrpCurrencyAmount) deliveredAmount).toXrp() + "\n")
+                );
+                flag.set(false);
+            });
+
+            try {
+                Thread.sleep(10 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
