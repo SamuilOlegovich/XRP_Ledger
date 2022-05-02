@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import lombok.SneakyThrows;
 import okhttp3.HttpUrl;
+import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
@@ -173,11 +174,13 @@ public class PaymentReal implements Runnable {
         prelimResult = xrplClient.submit(signedPayment);
         System.out.println("Prelim Result:  -- >  " + prelimResult);
 
+        // Подождать подтверждения транзакции **************************************************************************
+//        waitForTransactionConfirmation();
+    }
 
 
-        // ******************* ПЕРЕСМОТРЕТЬ И ПЕРЕОСМЫСЛИТЬ ЭТОТ КОД ***************************************************
-
-
+    // ******************* ПЕРЕСМОТРЕТЬ И ПЕРЕОСМЫСЛИТЬ ЭТОТ КОД *******************************************************
+    private boolean waitForTransactionConfirmation() throws InterruptedException, JsonRpcClientErrorException {
         // Wait for validation
         // Подождите подтверждения *************************************************************************************
         boolean transactionValidated = false;
@@ -186,13 +189,13 @@ public class PaymentReal implements Runnable {
         while (!transactionValidated && !transactionExpired) {
             Thread.sleep(4 * 1000);
 
-            LedgerIndex latestValidatedLedgerIndex = xrplClient.ledger(
-                    LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build()
-            ).ledgerIndex().orElseThrow(() -> new RuntimeException("Ledger response did not contain a LedgerIndex."));
+            LedgerIndex latestValidatedLedgerIndex = xrplClient.ledger(LedgerRequestParams.builder()
+                    .ledgerIndex(LedgerIndex.VALIDATED).build())
+                    .ledgerIndex().orElseThrow(() ->
+                            new RuntimeException("Ledger response did not contain a LedgerIndex."));
 
-            TransactionResult<org.xrpl.xrpl4j.model.transactions.Payment> transactionResult = xrplClient.transaction(
-                    TransactionRequestParams.of(signedPayment.hash()), org.xrpl.xrpl4j.model.transactions.Payment.class
-            );
+            TransactionResult<Payment> transactionResult =
+                    xrplClient.transaction(TransactionRequestParams.of(signedPayment.hash()), Payment.class);
 
             if (transactionResult.validated()) {
                 // Payment confirmed by result code
@@ -217,12 +220,13 @@ public class PaymentReal implements Runnable {
                 }
             }
         }
+        return true;
     }
 
     // Check transaction results
     // Проверить результаты транзакции *********************************************************************************
-    private void checkTransactionResults(TransactionResult<org.xrpl.xrpl4j.model.transactions.Payment> transactionResult,
-                                         SignedTransaction<org.xrpl.xrpl4j.model.transactions.Payment> signedPayment) {
+    private void checkTransactionResults(TransactionResult<Payment> transactionResult,
+                                         SignedTransaction<Payment> signedPayment) {
 
         AtomicBoolean flag = new AtomicBoolean(true);
 

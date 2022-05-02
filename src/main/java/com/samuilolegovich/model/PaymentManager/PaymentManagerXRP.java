@@ -1,32 +1,16 @@
 package com.samuilolegovich.model.PaymentManager;
 
+import com.samuilolegovich.enums.Enums;
 import com.samuilolegovich.model.realization.SocketXRP;
 import com.samuilolegovich.model.realization.WalletXRP;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
-
-public final class PaymentManagerXRP {
-    // REAL
-    public static String POST_URL_TWO = "https://s2.ripple.com:51234/";
-    public static String POST_URL = "https://s1.ripple.com:51234/";
-    public static String GET_URL = "https://data.ripple.com";
-
-    private String faucetClientHttpUrl;
-    private String httpUrlConnect;
-
+// REAL
+public class PaymentManagerXRP implements PaymentManager {
     private WalletXRP wallet;
     private SocketXRP socket;
-
-
-
-
-    public PaymentManagerXRP() {
-        this.faucetClientHttpUrl = null;
-        this.httpUrlConnect = null;
-    }
-
 
 
 
@@ -59,14 +43,6 @@ public final class PaymentManagerXRP {
     // TO DO тут подумать как лучше это сделать
     public void monitorAccountReplenishmentXRP(Object o) {}
 
-    public void setFaucetClientHttpUrl(String faucetClientHttpUrl) {
-        this.faucetClientHttpUrl = faucetClientHttpUrl;
-    }
-
-    public void setHttpUrlConnect(String httpUrlConnect) {
-        this.httpUrlConnect = httpUrlConnect;
-    }
-
     public String getClassicAddress() {
         if (wallet == null) return null;
         return wallet.getClassicAddress();
@@ -93,9 +69,8 @@ public final class PaymentManagerXRP {
         return wallet.getSeed();
     }
 
-    private void setterWallet() {
-        if (httpUrlConnect != null)
-            wallet.setXrpHttpUrl(httpUrlConnect);
+    public void setterWallet() {
+        wallet.setXrpHttpUrl(Enums.REAL_NET.value);
     }
 
 }

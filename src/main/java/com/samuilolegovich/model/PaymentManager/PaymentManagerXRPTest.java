@@ -1,5 +1,6 @@
 package com.samuilolegovich.model.PaymentManager;
 
+import com.samuilolegovich.enums.Enums;
 import com.samuilolegovich.model.realization.SocketXRPTest;
 import com.samuilolegovich.model.realization.WalletXRPTest;
 
@@ -8,92 +9,69 @@ import java.util.Map;
 
 
 
-public final class PaymentManagerXRPTest {
     // TEST
-    public static String FAUCET_CLIENT_HTTP_URL_TEST = "https://faucet.altnet.rippletest.net";
-    public static String XTP_HTTP_URL_ONE_TEST = "https://s.altnet.rippletest.net:51234/";
-
-    private String faucetClientHttpUrl;
-    private String httpUrlConnect;
-
+public final class PaymentManagerXRPTest implements PaymentManager {
     private WalletXRPTest wallet;
     private SocketXRPTest socket;
 
 
 
-    public PaymentManagerXRPTest() {
-        this.faucetClientHttpUrl = null;
-        this.httpUrlConnect = null;
-    }
-
-
 
     // ------------------------------------- TEST WALLET -------------------------------------
 
-    public void sendTestPayment(String address, Integer tag, BigDecimal numberOfXRP) {
+    public void sendPayment(String address, Integer tag, BigDecimal numberOfXRP) {
         if (wallet != null) wallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
     }
 
-    public Map<String, String> connectAnExistingTestWallet(String seed) {
+    public Map<String, String> connectAnExistingWallet(String seed) {
         if (wallet == null) wallet = new WalletXRPTest();
         return wallet.restoreWallet(seed);
     }
 
-    public Map<String, String> createNewTestWallet() {
+    public Map<String, String> createNewWallet() {
         if (wallet == null) wallet = new WalletXRPTest();
         return wallet.createNewWallet();
     }
 
-    public void updateTestWallet() {
+    public void updateWallet() {
         if (wallet != null) wallet.restoreWallet(wallet.getSeed());
     }
 
-    public void startTestSocket(){
+    public void startSocket(){
         socket = new SocketXRPTest();
     }
 
     // тут подумать как лучше это сделать
-    public void monitorTestAccountReplenishmentXRP(Object o){}
+    public void monitorAccountReplenishmentXRP(Object o){}
 
-    public void setFaucetClientHttpUrl(String faucetClientHttpUrl) {
-        this.faucetClientHttpUrl = faucetClientHttpUrl;
-    }
-
-    public void setHttpUrlConnect(String httpUrlConnect) {
-        this.httpUrlConnect = httpUrlConnect;
-    }
-
-    public String getTestClassicAddress() {
+    public String getClassicAddress() {
         if (wallet == null) return null;
         return wallet.getClassicAddress();
     }
 
-    public String getTestPrivateKey() {
+    public String getPrivateKey() {
         if (wallet == null) return null;
         return wallet.getPrivateKey();
     }
 
-    public String getTestXAddress() {
+    public String getXAddress() {
         if (wallet == null) return null;
         return wallet.getXAddress();
     }
 
 
-    public String getTestPublicKey() {
+    public String getPublicKey() {
         if (wallet == null) return null;
         return wallet.getPublicKey();
     }
 
-    public String getTestSeed() {
+    public String getSeed() {
         if (wallet == null) return null;
         return wallet.getSeed();
     }
 
-    private void setterTestWallet() {
-//        if (testFaucetClientHttpUrl != null)
-//            testWallet.setFaucetClientHttpUrl(testFaucetClientHttpUrl);
-        if (httpUrlConnect != null)
-            wallet.setXrpHttpUrl(httpUrlConnect);
+    public void setterWallet() {
+        wallet.setXrpHttpUrl(Enums.TEST_NET.value);
     }
 
 }
