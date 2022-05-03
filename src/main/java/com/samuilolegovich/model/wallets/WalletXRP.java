@@ -3,7 +3,7 @@ package com.samuilolegovich.model.wallets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.enums.Enums;
+import com.samuilolegovich.enums.EnumStr;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -28,15 +28,16 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.samuilolegovich.enums.EnumBoo.IS_WALLET;
 
 
-public class WalletXRP implements Wallet, Wallets {
+public class WalletXRP implements Wallet, MyWallets {
     private SeedWalletGenerationResult generationResult;
-    private SignedTransaction<Payment> signedPayment;
     private AccountInfoResult accountInfoResult;
     private UnsignedInteger lastLedgerSequence;
     private WalletFactory walletFactory;
@@ -45,28 +46,21 @@ public class WalletXRP implements Wallet, Wallets {
     private HttpUrl rippledUrl;
     private Wallet wallet;
 
+    private SignedTransaction<Payment> signedPayment;
+
+    private Map<String, String> createNewWalletData;
+
     private boolean paymentWasSuccessful = false;
 
 
-    @Override
-    public String getSeed() {
-        if (generationResult != null) return generationResult.seed();
-        return "Это не новый кошелек, у вас уже есть востановительная фраза";
+    public WalletXRP() {
+        if (IS_WALLET.b) {
+            restoreWallet();
+        } else {
+            this.createNewWalletData = createNewWallet();
+        }
     }
 
-    @Override
-    public String getClassicAddress() { return classicAddress().toString(); }
-
-    @Override
-    public String getXAddress() { return xAddress().toString(); }
-
-    @Override
-    public String getPrivateKey() { return privateKey().get(); }
-
-    @Override
-    public String getPublicKey() {
-        return publicKey();
-    }
 
     @Override
     public Optional<String> privateKey() {
@@ -94,46 +88,71 @@ public class WalletXRP implements Wallet, Wallets {
     }
 
     @Override
+    public String getBalance() {
+        return accountInfoResult != null
+                ? accountInfoResult.accountData().balance().toString()
+                :"0000000";
+    }
+
+    @Override
+    public String getSeed() {
+        if (createNewWalletData != null) {
+            return generationResult.seed();
+        }
+        return "Это не новый кошелек, у вас уже есть востановительная фраза";
+    }
+
+
+    @Override
     public Map<String, String> createNewWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
         generationResult = walletFactory.randomWallet(false);
         wallet = generationResult.wallet();
 
-        try { Thread.sleep(7000);
+        try {
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         classicAddress = wallet.classicAddress();
-        Enums.setValue(Enums.REAL_SEED, getSeed());
+        EnumStr.setValue(EnumStr.REAL_SEED, getSeed());
+        createConnect();
 
-        return Map.of(
-                "Seed", Enums.REAL_SEED.value,
-                "Public Key", getPublicKey(),
-                "Private Key", getPrivateKey(),
-                "Classic Address", getClassicAddress(),
-                "X Address", getXAddress()
+        createNewWalletData = Map.of(
+                "Seed", EnumStr.TEST_SEED.value,
+                "Public Key", publicKey(),
+                "Private Key", privateKey().get(),
+                "Classic Address", classicAddress().toString(),
+                "X Address", xAddress().toString(),
+                "Balance", accountInfoResult != null
+                        ? accountInfoResult.accountData().balance().toString()
+                        : "0000000"
         );
-    }
 
+        return new HashMap<>(createNewWalletData);
+    }
 
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(Enums.REAL_SEED.value, true);
+        wallet = walletFactory.fromSeed(EnumStr.REAL_SEED.value, true);
 
         // Get the Classic address from wallet
         // Получите классический адрес из wallet
         classicAddress = wallet.classicAddress();
+        createConnect();
 
         return Map.of(
-                "Public Key", getPublicKey(),
-                "Private Key", getPrivateKey(),
-                "Classic Address", getClassicAddress(),
-                "X Address", getXAddress()
+                "Public Key", publicKey(),
+                "Private Key", privateKey().get(),
+                "Classic Address", classicAddress().toString(),
+                "X Address", xAddress().toString(),
+                "Balance", accountInfoResult != null
+                        ? accountInfoResult.accountData().balance().toString()
+                        : "0000000"
         );
     }
-
 
 
     // ТУТ СДЕЛАТЬ ТАК ЧТОБЫ ПРОСТОЕ ЧИСЛО С ЗАПЯТОЙ ПЕРЕРАБАТЫВАЛОСЬ В БИГ ДЕЦИМИАЛ************************************
@@ -141,7 +160,7 @@ public class WalletXRP implements Wallet, Wallets {
         try {
             // Connect --------------------------------------------------------
             // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(Enums.POST_URL_ONE.value);
+            rippledUrl = HttpUrl.get(EnumStr.POST_URL_ONE.value);
             xrplClient = new XrplClient(rippledUrl);
             System.out.println(xrplClient.serverInfo().toString());
 
@@ -155,8 +174,8 @@ public class WalletXRP implements Wallet, Wallets {
                     .build();
             accountInfoResult = xrplClient.accountInfo(requestParams);
             UnsignedInteger sequence = accountInfoResult.accountData().sequence();
-            System.out.println("Account Info Request Params:\n  " + requestParams.account() + "\n");
-            System.out.println("Unsigned Integer:\n " + sequence.toString() + "\n");
+            System.out.println("Account Info Request Params:  -- >  " + requestParams.account());
+            System.out.println("Unsigned Integer:  -- >  " + sequence.toString());
 
 
             // Request current fee information from rippled
@@ -172,14 +191,14 @@ public class WalletXRP implements Wallet, Wallets {
                     .build())
                     .ledgerIndex()
                     .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
-            System.out.println("Ledger Index:\n " + validatedLedger.toString() + "\n");
+            System.out.println("Ledger Index:  -- >  " + validatedLedger.toString());
 
 
             // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
             // Обходной путь для https://github.com/XRPLF/xrpl4j/issues/84
             lastLedgerSequence = UnsignedInteger.valueOf(validatedLedger.plus(UnsignedLong.valueOf(4))
                     .unsignedLongValue().intValue());
-            System.out.println("Unsigned Integer:\n " + lastLedgerSequence + "\n");
+            System.out.println("Unsigned Integer:  -- >  " + lastLedgerSequence);
 
 
             // Construct a Payment
@@ -195,7 +214,7 @@ public class WalletXRP implements Wallet, Wallets {
                     .signingPublicKey(wallet.publicKey())
                     .lastLedgerSequence(lastLedgerSequence)
                     .build();
-            System.out.println("Constructed Payment:\n  " + payment + "\n");
+            System.out.println("Constructed Payment:  -- >  " + payment);
 
 
             // Sign transaction -----------------------------------------------------------
@@ -204,17 +223,17 @@ public class WalletXRP implements Wallet, Wallets {
             // Создайте SignatureService для подписи платежа
             PrivateKey privateKey = PrivateKey.fromBase16EncodedPrivateKey(wallet.privateKey().get());
             SignatureService signatureService = new SingleKeySignatureService(privateKey);
-            System.out.println("Private Key:\n  " + privateKey + "\n");
+            System.out.println("Private Key:  -- >  " + privateKey);
 
             // Sign the Payment
             signedPayment = signatureService.sign(KeyMetadata.EMPTY, payment);
-            System.out.println("Signed Payment:\n   " + signedPayment.signedTransaction() + "\n");
+            System.out.println("Signed Payment:  -- >  " + signedPayment.signedTransaction());
 
 
             // Submit transaction ---------------------------------------------------------
             // Отправить транзакцию -------------------------------------------------------
             SubmitResult<Transaction> prelimResult = xrplClient.submit(signedPayment);
-            System.out.println("Submit Result Transaction:\n    " + prelimResult + "\n");
+            System.out.println("Submit Result Transaction:  -- >  " + prelimResult);
             waitForValidationTransaction();
         } catch (JsonRpcClientErrorException | JsonProcessingException e) {
         }
@@ -245,22 +264,22 @@ public class WalletXRP implements Wallet, Wallets {
 
             if (transactionResult.validated()) {
                 // Платеж подтвержден кодом результата
-                System.out.println("Payment was validated with result code:\n   "
-                        + transactionResult.metadata().get().transactionResult() + "\n");
+                System.out.println("Payment was validated with result code:  -- >  "
+                        + transactionResult.metadata().get().transactionResult());
                 transactionValidated = true;
             } else {
                 boolean lastLedgerSequenceHasPassed = FluentCompareTo.is(latestValidatedLedgerIndex.unsignedLongValue())
                         .greaterThan(UnsignedLong.valueOf(lastLedgerSequence.intValue()));
                 if (lastLedgerSequenceHasPassed) {
                     // LastLedgerSequence прошел. Последний ответ tx
-                    System.out.println("LastLedgerSequence has passed. Last tx response:\n  " + transactionResult + "\n");
+                    System.out.println("LastLedgerSequence has passed. Last tx response:  -- >  " + transactionResult);
                     transactionExpired = true;
                     // Check transaction results --------------------------------------------------
                     // Проверить результаты транзакции --------------------------------------------
                     checkTransactionResults(transactionResult, signedPayment);
                 } else {
                     // Платеж еще не подтвержден
-                    System.out.println("Payment not yet validated.\n");
+                    System.out.println("Payment not yet validated.");
                 }
             }
         }
@@ -272,15 +291,13 @@ public class WalletXRP implements Wallet, Wallets {
     private void checkTransactionResults(TransactionResult<Payment> transactionResult, SignedTransaction<Payment> signedPayment) {
         AtomicBoolean flag = new AtomicBoolean(true);
         while (flag.get()) {
-            System.out.println("Transaction Result:\n   " + transactionResult + "\n");
-            System.out.println("Explorer link:\n    https://testnet.xrpl.org/transactions/" + signedPayment.hash() + "\n");
+            System.out.println("Transaction Result:  -- >  " + transactionResult);
+            System.out.println("Explorer link:  -- >  https://testnet.xrpl.org/transactions/" + signedPayment.hash());
 
             transactionResult.metadata().ifPresent(metadata -> {
-                System.out.println("Result code:\n  " + metadata.transactionResult() + "\n");
-
+                System.out.println("Result code:  -- >  " + metadata.transactionResult());
                 metadata.deliveredAmount().ifPresent(deliveredAmount ->
-                        System.out.println("XRP Delivered:\n    " + ((XrpCurrencyAmount) deliveredAmount).toXrp() + "\n")
-                );
+                        System.out.println("XRP Delivered:  -- >  " + ((XrpCurrencyAmount) deliveredAmount).toXrp()));
                 flag.set(false);
             });
 
@@ -289,6 +306,27 @@ public class WalletXRP implements Wallet, Wallets {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void createConnect() {
+        try {
+            // Connect --------------------------------------------------------
+            // Соединять ------------------------------------------------------
+            rippledUrl = HttpUrl.get(EnumStr.POST_URL_ONE.value);
+            xrplClient = new XrplClient(rippledUrl);
+
+            // Prepare transaction --------------------------------------------------------
+            // Подготовить транзакцию -----------------------------------------------------
+            // Look up your Account Info
+            // Посмотрите информацию о своей учетной записи
+            AccountInfoRequestParams requestParams = AccountInfoRequestParams.builder()
+                    .ledgerIndex(LedgerIndex.VALIDATED)
+                    .account(classicAddress)
+                    .build();
+            accountInfoResult = xrplClient.accountInfo(requestParams);
+        } catch (JsonRpcClientErrorException e) {
+            System.out.println("Для начала стоило бы активировать счет - пополнить.");
         }
     }
 }

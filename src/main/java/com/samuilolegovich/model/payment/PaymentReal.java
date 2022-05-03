@@ -2,6 +2,7 @@ package com.samuilolegovich.model.payment;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
+import com.samuilolegovich.enums.EnumBoo;
 import lombok.SneakyThrows;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -32,7 +33,8 @@ import org.xrpl.xrpl4j.wallet.WalletFactory;
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.samuilolegovich.enums.Enums.*;
+import static com.samuilolegovich.enums.EnumStr.*;
+
 
 public class PaymentReal implements Runnable {
     private SeedWalletGenerationResult generationResult;
@@ -62,7 +64,7 @@ public class PaymentReal implements Runnable {
     public void run() {
         // Determine if we have a seed phrase for the wallet or is it worth generating a new one
         // Определяем есть ли у нас сид фраза для кошелька или стоит сгенирировать новый
-        isWallet = IS_WALLET.value.equalsIgnoreCase("true");
+        isWallet = EnumBoo.IS_WALLET.b;
 
 
         // Credential example
