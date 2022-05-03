@@ -81,7 +81,7 @@ public class PaymentReal implements Runnable {
             System.out.println(wallet.classicAddress()); // Example: rGCkuB7PBr5tNy68tPEABEtcdno4hE6Y7f
             System.out.println(generationResult.seed()); // Example: sp6JS7f14BuwFY8Mw6bTtLKWauoUs
         } else {
-            wallet = walletFactory.fromSeed(REAL_SEED.value, true);
+            wallet = walletFactory.fromSeed(SEED_REAL.value, true);
         }
 
 
@@ -96,7 +96,7 @@ public class PaymentReal implements Runnable {
 
         // Server connection
         // Подключение к серверу ***************************************************************************************
-        rippledUrl = HttpUrl.get(REAL_NET.value);
+        rippledUrl = HttpUrl.get(NET_REAL.value);
         xrplClient = new XrplClient(rippledUrl);
 
         // Will issue
@@ -146,7 +146,7 @@ public class PaymentReal implements Runnable {
         payment = org.xrpl.xrpl4j.model.transactions.Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(REAL_ADDRESS.value))
+                .destination(Address.of(ADDRESS_REAL.value))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())

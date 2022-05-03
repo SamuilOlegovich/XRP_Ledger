@@ -30,13 +30,11 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.samuilolegovich.enums.EnumBoo.IS_WALLET;
 import static com.samuilolegovich.enums.EnumBoo.IS_WALLET_TEST;
 
 
@@ -147,11 +145,14 @@ public class WalletXRPTest implements Wallet, MyWallets {
         }
 
         classicAddress = wallet.classicAddress();
-        EnumStr.setValue(EnumStr.TEST_SEED, getSeed());
+        EnumStr.setValue(EnumStr.SEED_TEST, getSeed());
+
         replenishBalanceWallet();
+        createConnect();
+        lookUpYourAccountInfo();
 
         createNewWalletData = Map.of(
-                "Seed", EnumStr.TEST_SEED.value,
+                "Seed", EnumStr.SEED_TEST.value,
                 "Public Key", publicKey(),
                 "Private Key", privateKey().get(),
                 "Classic Address", classicAddress().toString(),
@@ -166,7 +167,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(EnumStr.TEST_SEED.value, true);
+        wallet = walletFactory.fromSeed(EnumStr.SEED_TEST.value, true);
 
         System.out.println("\nWallet:  -->  \n"
                 + "public key  -->  " + wallet.publicKey() + "\n"
@@ -178,8 +179,9 @@ public class WalletXRPTest implements Wallet, MyWallets {
         // Получите классический адрес из wallet
         classicAddress = wallet.classicAddress();
         System.out.println("Classic Address:  -->  " + classicAddress);
-        replenishBalanceWallet();
 
+        createConnect();
+        lookUpYourAccountInfo();
 
         return Map.of(
                 "Public Key", publicKey(),
@@ -193,33 +195,35 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     // пополняем тестовый счет
     private void replenishBalanceWallet() {
-        try {
-            // Fund the account using the testnet Faucet
-            // Пополните счет с помощью Testnet Faucet
-            FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(EnumStr.FAUCET_CLIENT_HTTP_URL_TEST.value));
-            faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
-            createConnect();
-
-            // Look up your Account Info
-            // Посмотрите информацию о своей учетной записи
-            accountInfoRequestParams = AccountInfoRequestParams.of(classicAddress);
-            accountInfoResult = xrplClient.accountInfo(accountInfoRequestParams);
-            System.out.println("Account Info Result -->  " + accountInfoResult);
-        } catch (JsonRpcClientErrorException e) {
-            e.printStackTrace();
-        }
+        // Fund the account using the testnet Faucet
+        // Пополните счет с помощью Testnet Faucet
+        FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(EnumStr.FAUCET_CLIENT_HTTP_URL_TEST.value));
+        faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
+        createConnect();
     }
 
     private void createConnect() {
         try {
             // Connect --------------------------------------------------------
             // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(EnumStr.TEST_NET.value);
+            rippledUrl = HttpUrl.get(EnumStr.NET_TEST.value);
             xrplClient = new XrplClient(rippledUrl);
             System.out.println("Server Info  -- >  " + xrplClient.serverInfo().toString());
         } catch (JsonRpcClientErrorException e) {
             e.printStackTrace();
         }
+    }
+
+    private void lookUpYourAccountInfo() {
+        // Look up your Account Info
+        // Посмотрите информацию о своей учетной записи
+        try {
+            accountInfoRequestParams = AccountInfoRequestParams.of(classicAddress);
+            accountInfoResult = xrplClient.accountInfo(accountInfoRequestParams);
+        } catch (JsonRpcClientErrorException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Account Info Result -->  " + accountInfoResult);
     }
 
 

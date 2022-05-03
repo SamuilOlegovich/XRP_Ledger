@@ -38,9 +38,11 @@ import static com.samuilolegovich.enums.EnumBoo.IS_WALLET;
 
 public class WalletXRP implements Wallet, MyWallets {
     private SeedWalletGenerationResult generationResult;
+    private AccountInfoRequestParams requestParams;
     private AccountInfoResult accountInfoResult;
     private UnsignedInteger lastLedgerSequence;
     private WalletFactory walletFactory;
+    private UnsignedInteger sequence;
     private Address classicAddress;
     private XrplClient xrplClient;
     private HttpUrl rippledUrl;
@@ -54,8 +56,7 @@ public class WalletXRP implements Wallet, MyWallets {
 
 
     public WalletXRP() {
-        if (IS_WALLET.b) {
-            restoreWallet();
+        if (IS_WALLET.b) { restoreWallet();
         } else {
             this.createNewWalletData = createNewWallet();
         }
@@ -116,11 +117,12 @@ public class WalletXRP implements Wallet, MyWallets {
         }
 
         classicAddress = wallet.classicAddress();
-        EnumStr.setValue(EnumStr.REAL_SEED, getSeed());
+        EnumStr.setValue(EnumStr.SEED_REAL, getSeed());
         createConnect();
+        getInformationAboutYourAccount();
 
         createNewWalletData = Map.of(
-                "Seed", EnumStr.TEST_SEED.value,
+                "Seed", EnumStr.SEED_REAL.value,
                 "Public Key", publicKey(),
                 "Private Key", privateKey().get(),
                 "Classic Address", classicAddress().toString(),
@@ -136,12 +138,13 @@ public class WalletXRP implements Wallet, MyWallets {
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(EnumStr.REAL_SEED.value, true);
+        wallet = walletFactory.fromSeed(EnumStr.SEED_REAL.value, true);
 
         // Get the Classic address from wallet
         // Получите классический адрес из wallet
         classicAddress = wallet.classicAddress();
         createConnect();
+        getInformationAboutYourAccount();
 
         return Map.of(
                 "Public Key", publicKey(),
@@ -158,25 +161,8 @@ public class WalletXRP implements Wallet, MyWallets {
     // ТУТ СДЕЛАТЬ ТАК ЧТОБЫ ПРОСТОЕ ЧИСЛО С ЗАПЯТОЙ ПЕРЕРАБАТЫВАЛОСЬ В БИГ ДЕЦИМИАЛ************************************
     public void sendPaymentToAddressXRP(String address, Integer tag, BigDecimal numberOfXRP) {
         try {
-            // Connect --------------------------------------------------------
-            // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(EnumStr.POST_URL_ONE.value);
-            xrplClient = new XrplClient(rippledUrl);
-            System.out.println(xrplClient.serverInfo().toString());
-
-            // Prepare transaction --------------------------------------------------------
-            // Подготовить транзакцию -----------------------------------------------------
-            // Look up your Account Info
-            // Посмотрите информацию о своей учетной записи
-            AccountInfoRequestParams requestParams = AccountInfoRequestParams.builder()
-                    .ledgerIndex(LedgerIndex.VALIDATED)
-                    .account(classicAddress)
-                    .build();
-            accountInfoResult = xrplClient.accountInfo(requestParams);
-            UnsignedInteger sequence = accountInfoResult.accountData().sequence();
-            System.out.println("Account Info Request Params:  -- >  " + requestParams.account());
-            System.out.println("Unsigned Integer:  -- >  " + sequence.toString());
-
+            createConnect();
+            getInformationAboutYourAccount();
 
             // Request current fee information from rippled
             // Запросить информацию о текущих сборах у rippled
@@ -310,21 +296,27 @@ public class WalletXRP implements Wallet, MyWallets {
     }
 
     private void createConnect() {
-        try {
-            // Connect --------------------------------------------------------
-            // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(EnumStr.POST_URL_ONE.value);
-            xrplClient = new XrplClient(rippledUrl);
+        // Connect --------------------------------------------------------
+        // Соединять ------------------------------------------------------
+        rippledUrl = HttpUrl.get(EnumStr.POST_URL_ONE.value);
+        xrplClient = new XrplClient(rippledUrl);
+    }
 
+    private void getInformationAboutYourAccount() {
+        try {
             // Prepare transaction --------------------------------------------------------
             // Подготовить транзакцию -----------------------------------------------------
             // Look up your Account Info
             // Посмотрите информацию о своей учетной записи
-            AccountInfoRequestParams requestParams = AccountInfoRequestParams.builder()
+            requestParams = AccountInfoRequestParams.builder()
                     .ledgerIndex(LedgerIndex.VALIDATED)
                     .account(classicAddress)
                     .build();
             accountInfoResult = xrplClient.accountInfo(requestParams);
+
+            sequence = accountInfoResult.accountData().sequence();
+            System.out.println("Account Info Request Params:  -- >  " + requestParams.account());
+            System.out.println("Unsigned Integer:  -- >  " + sequence.toString());
         } catch (JsonRpcClientErrorException e) {
             System.out.println("Для начала стоило бы активировать счет - пополнить.");
         }

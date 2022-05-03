@@ -31,12 +31,11 @@ public class PaymentManagerXRP implements PaymentManager {
 
     @Override
     public Map<String, String> connectAnExistingWallet(String seed, boolean isReal) {
-        EnumStr.setValue(EnumStr.REAL_SEED, seed);
         if (isReal) {
-            EnumStr.setValue(EnumStr.REAL_SEED, seed);
+            EnumStr.setValue(EnumStr.SEED_REAL, seed);
             return wallet.restoreWallet();
         }
-        EnumStr.setValue(EnumStr.TEST_SEED, seed);
+        EnumStr.setValue(EnumStr.SEED_TEST, seed);
         return walletTest.restoreWallet();
     }
 
