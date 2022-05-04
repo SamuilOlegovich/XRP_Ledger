@@ -3,7 +3,8 @@ package com.samuilolegovich.model.wallets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.enums.EnumStr;
+import com.samuilolegovich.enums.BooleanEnum;
+import com.samuilolegovich.enums.StringEnum;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -30,13 +31,11 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.samuilolegovich.enums.EnumBoo.IS_WALLET_TEST;
 
 
 public class WalletXRPTest implements Wallet, MyWallets {
@@ -59,7 +58,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
     private boolean paymentWasSuccessful = false;
 
     public WalletXRPTest() {
-        if (IS_WALLET_TEST.b) { restoreWallet();
+        if (BooleanEnum.IS_WALLET_TEST.b) { restoreWallet();
         } else { this.createNewWalletData = createNewWallet(); }
     }
 
@@ -123,14 +122,14 @@ public class WalletXRPTest implements Wallet, MyWallets {
         }
 
         classicAddress = wallet.classicAddress();
-        EnumStr.setValue(EnumStr.SEED_TEST, getSeed());
+        StringEnum.setValue(StringEnum.SEED_TEST, getSeed());
 
         replenishBalanceWallet();
         createConnect();
         lookUpYourAccountInfo();
 
         createNewWalletData = Map.of(
-                "Seed", EnumStr.SEED_TEST.value,
+                "Seed", StringEnum.SEED_TEST.value,
                 "Public Key", publicKey(),
                 "Private Key", privateKey().get(),
                 "Classic Address", classicAddress().toString(),
@@ -145,7 +144,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(EnumStr.SEED_TEST.value, true);
+        wallet = walletFactory.fromSeed(StringEnum.SEED_TEST.value, true);
 
         System.out.println("\nWallet:  -->  \n"
                 + "public key  -->  " + wallet.publicKey() + "\n"
@@ -175,7 +174,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
     private void replenishBalanceWallet() {
         // Fund the account using the testnet Faucet
         // Пополните счет с помощью Testnet Faucet
-        FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(EnumStr.FAUCET_CLIENT_HTTP_URL_TEST.value));
+        FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(StringEnum.FAUCET_CLIENT_HTTP_URL_TEST.value));
         faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
         createConnect();
     }
@@ -184,7 +183,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
         try {
             // Connect --------------------------------------------------------
             // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(EnumStr.NET_TEST.value);
+            rippledUrl = HttpUrl.get(StringEnum.NET_TEST.value);
             xrplClient = new XrplClient(rippledUrl);
             System.out.println("Server Info  -- >  " + xrplClient.serverInfo().toString());
         } catch (JsonRpcClientErrorException e) {
@@ -368,15 +367,5 @@ public class WalletXRPTest implements Wallet, MyWallets {
             }
         }
     }
-
-//    Xpring4J returns the following transaction states:
-//
-//    SUCCEEDED: The transaction was successfully validated and applied to the XRP Ledger.
-//            FAILED: The transaction was successfully validated but not applied to the XRP Ledger. Or the operation will never be validated.
-//            PENDING: The transaction has not yet been validated, but may be validated in the future.
-//            UNKNOWN: The transaction status could not be determined, the hash represented a non-payment type transaction, or the hash represented a transaction with the tfPartialPayment flag set.
-//            Note: For more information, see Reliable Transaction Submission and Transaction Results.
-
-
 }
 

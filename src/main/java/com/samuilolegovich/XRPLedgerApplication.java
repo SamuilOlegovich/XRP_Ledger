@@ -1,11 +1,9 @@
 package com.samuilolegovich;
 
-import com.samuilolegovich.enums.EnumBoo;
-import com.samuilolegovich.enums.EnumStr;
+import com.samuilolegovich.enums.BooleanEnum;
+import com.samuilolegovich.enums.StringEnum;
 import com.samuilolegovich.model.PaymentManager.PaymentManager;
 import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
-import com.samuilolegovich.model.payment.PaymentReal;
-import com.samuilolegovich.model.payment.PaymentTest;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -22,23 +20,23 @@ public class XRPLedgerApplication {
     public static void testPayment() {
 //        new PaymentTest().run();
 //        new PaymentReal().run();
-        EnumBoo.setValue(EnumBoo.IS_REAL, false);
-        EnumBoo.setValue(EnumBoo.IS_WALLET, true);
+        BooleanEnum.setValue(BooleanEnum.IS_REAL, false);
+        BooleanEnum.setValue(BooleanEnum.IS_WALLET, true);
 
         PaymentManager paymentManager = new PaymentManagerXRP();
 
-        System.out.println("X Address  -- >  " + paymentManager.getXAddress(EnumBoo.IS_REAL.b));
-        System.out.println("Classic Address  -- >  " + paymentManager.getClassicAddress(EnumBoo.IS_REAL.b));
-        System.out.println("Private Key  -- >  " + paymentManager.getPrivateKey(EnumBoo.IS_REAL.b));
-        System.out.println("Public Key  -- >  " + paymentManager.getPublicKey(EnumBoo.IS_REAL.b));
-        System.out.println("Seed  -- >  " + paymentManager.getSeed(EnumBoo.IS_REAL.b));
+        System.out.println("X Address  -- >  " + paymentManager.getXAddress(BooleanEnum.IS_REAL.b));
+        System.out.println("Classic Address  -- >  " + paymentManager.getClassicAddress(BooleanEnum.IS_REAL.b));
+        System.out.println("Private Key  -- >  " + paymentManager.getPrivateKey(BooleanEnum.IS_REAL.b));
+        System.out.println("Public Key  -- >  " + paymentManager.getPublicKey(BooleanEnum.IS_REAL.b));
+        System.out.println("Seed  -- >  " + paymentManager.getSeed(BooleanEnum.IS_REAL.b));
 
-        System.out.println("All Balance  -- >  " + paymentManager.getAllBalance(EnumBoo.IS_REAL.b));
-        System.out.println("Balance  -- >  " + paymentManager.getBalance(EnumBoo.IS_REAL.b));
+        System.out.println("All Balance  -- >  " + paymentManager.getAllBalance(BooleanEnum.IS_REAL.b));
+        System.out.println("Balance  -- >  " + paymentManager.getBalance(BooleanEnum.IS_REAL.b));
 
-        paymentManager.sendPayment(EnumStr.ADDRESS_REAL.value, 777, BigDecimal.ONE, EnumBoo.IS_REAL.b);
+        paymentManager.sendPayment(StringEnum.ADDRESS_REAL.value, 777, BigDecimal.ONE, BooleanEnum.IS_REAL.b);
 
-        System.out.println("AllBalance  -- >  " + paymentManager.getAllBalance(EnumBoo.IS_REAL.b));
-        System.out.println("Balance  -- >  " + paymentManager.getBalance(EnumBoo.IS_REAL.b));
+        System.out.println("AllBalance  -- >  " + paymentManager.getAllBalance(BooleanEnum.IS_REAL.b));
+        System.out.println("Balance  -- >  " + paymentManager.getBalance(BooleanEnum.IS_REAL.b));
     }
 }

@@ -2,7 +2,7 @@ package com.samuilolegovich.model.payment;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.samuilolegovich.enums.EnumBoo;
+import com.samuilolegovich.enums.BooleanEnum;
 import lombok.SneakyThrows;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -33,7 +33,7 @@ import org.xrpl.xrpl4j.wallet.WalletFactory;
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.samuilolegovich.enums.EnumStr.*;
+import static com.samuilolegovich.enums.StringEnum.*;
 
 
 public class PaymentTest implements Runnable {
@@ -63,7 +63,7 @@ public class PaymentTest implements Runnable {
     @Override
     public void run() {
         // Определяем есть ли у нас сид фраза для кошелька или стоит сгенирировать новый
-        isWallet = EnumBoo.IS_WALLET.b;
+        isWallet = BooleanEnum.IS_WALLET.b;
 
 
 

@@ -1,16 +1,13 @@
 package com.samuilolegovich.model.PaymentManager;
 
-import com.samuilolegovich.enums.EnumStr;
-import com.samuilolegovich.enums.SettingsXRP;
+import com.samuilolegovich.enums.StringEnum;
 import com.samuilolegovich.model.sockets.SocketXRP;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Optional;
 
-// REAL
 public class PaymentManagerXRP implements PaymentManager {
     private WalletXRPTest walletTest;
     private WalletXRP wallet;
@@ -33,10 +30,10 @@ public class PaymentManagerXRP implements PaymentManager {
     @Override
     public Map<String, String> connectAnExistingWallet(String seed, boolean isReal) {
         if (isReal) {
-            EnumStr.setValue(EnumStr.SEED_REAL, seed);
+            StringEnum.setValue(StringEnum.SEED_REAL, seed);
             return wallet.restoreWallet();
         }
-        EnumStr.setValue(EnumStr.SEED_TEST, seed);
+        StringEnum.setValue(StringEnum.SEED_TEST, seed);
         return walletTest.restoreWallet();
     }
 
@@ -101,7 +98,7 @@ public class PaymentManagerXRP implements PaymentManager {
     @Override
     public BigDecimal getBalance(boolean isReal) {
         BigDecimal allBalance = getAllBalance(isReal);
-        BigDecimal activationPayment = new BigDecimal(EnumStr.ACTIVATION_PAYMENT.value);
+        BigDecimal activationPayment = new BigDecimal(StringEnum.ACTIVATION_PAYMENT.value);
         int compareTo = allBalance.compareTo(activationPayment);
         if (compareTo <= 0) { return new BigDecimal("0.000000"); }
         return allBalance.subtract(activationPayment);
