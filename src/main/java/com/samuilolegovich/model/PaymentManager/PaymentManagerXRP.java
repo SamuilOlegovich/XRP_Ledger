@@ -1,6 +1,7 @@
 package com.samuilolegovich.model.PaymentManager;
 
 import com.samuilolegovich.enums.EnumStr;
+import com.samuilolegovich.enums.SettingsXRP;
 import com.samuilolegovich.model.sockets.SocketXRP;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
@@ -98,7 +99,16 @@ public class PaymentManagerXRP implements PaymentManager {
     }
 
     @Override
-    public String getBalance(boolean isReal) {
+    public BigDecimal getBalance(boolean isReal) {
+        BigDecimal allBalance = getAllBalance(isReal);
+        BigDecimal activationPayment = new BigDecimal(EnumStr.ACTIVATION_PAYMENT.value);
+        int compareTo = allBalance.compareTo(activationPayment);
+        if (compareTo <= 0) { return new BigDecimal("0.000000"); }
+        return allBalance.subtract(activationPayment);
+    }
+
+    @Override
+    public BigDecimal getAllBalance(boolean isReal) {
         if (isReal) { return wallet.getBalance(); }
         return walletTest.getBalance();
     }

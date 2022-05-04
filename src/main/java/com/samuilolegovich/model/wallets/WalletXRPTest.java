@@ -30,6 +30,7 @@ import org.xrpl.xrpl4j.wallet.Wallet;
 import org.xrpl.xrpl4j.wallet.WalletFactory;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -89,8 +90,9 @@ public class WalletXRPTest implements Wallet, MyWallets {
     }
 
     @Override
-    public String getBalance() {
-        return accountInfoResult.accountData().balance().toString();
+    public BigDecimal getBalance() {
+        lookUpYourAccountInfo();
+        return accountInfoResult.accountData().balance().toXrp();
     }
 
     @Override
@@ -105,30 +107,6 @@ public class WalletXRPTest implements Wallet, MyWallets {
     private final static String METHOD_GET_TRANSACTION = "/v2/accounts/{0}/transactions";
     private final static String METHOD_GET_BALANCE = "/v2/accounts/{0}/balances";
     private final static String METHOD_POST_SIGN = "sign";
-
-
-
-//    public double getBalance(){
-//        HashMap<String, String> params = new HashMap<String, String>();
-//        params.put("currency", CoinConstant.COIN_XRP);
-//        String re = HttpUtil.jsonGet(getUrl + MessageFormat.format(METHOD_GET_BALANCE, address), params);
-//        if(!StringUtils.isEmpty(re)){
-//            JSONObject json = JSON.parseObject(re);
-//            if (SUCCESS.equals(json.getString(RESULT))) {
-//                JSONArray array = json.getJSONArray("balances");
-//                if (array != null && array.size() > 0) {
-//                    // Общий баланс
-//                    double balance = array.getJSONObject(0).getDoubleValue("value");
-//                    if (balance >= 20) {
-//                        // Доступный баланс xrp заморозит 20 монет
-//                        return BigDecimalUtil.sub(balance, 20);
-//                    }
-//                }
-//            }
-//        }
-//        return 0.00;
-//    }
-
 
 
 
@@ -366,7 +344,8 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     // Check transaction results --------------------------------------------------
     // Проверить результаты транзакции --------------------------------------------
-    private void checkTransactionResults(TransactionResult<Payment> transactionResult, SignedTransaction<Payment> signedPayment) {
+    private void checkTransactionResults(TransactionResult<Payment> transactionResult,
+                                         SignedTransaction<Payment> signedPayment) {
         AtomicBoolean flag = new AtomicBoolean(true);
 
         while (flag.get()) {
@@ -389,5 +368,15 @@ public class WalletXRPTest implements Wallet, MyWallets {
             }
         }
     }
+
+//    Xpring4J returns the following transaction states:
+//
+//    SUCCEEDED: The transaction was successfully validated and applied to the XRP Ledger.
+//            FAILED: The transaction was successfully validated but not applied to the XRP Ledger. Or the operation will never be validated.
+//            PENDING: The transaction has not yet been validated, but may be validated in the future.
+//            UNKNOWN: The transaction status could not be determined, the hash represented a non-payment type transaction, or the hash represented a transaction with the tfPartialPayment flag set.
+//            Note: For more information, see Reliable Transaction Submission and Transaction Results.
+
+
 }
 

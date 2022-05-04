@@ -16,8 +16,10 @@ public interface PaymentManager {
     String getPrivateKey(boolean isReal);
     String getPublicKey(boolean isReal);
     String getXAddress(boolean isReal);
-    String getBalance(boolean isReal);
     String getSeed(boolean isReal);
+
+    BigDecimal getAllBalance(boolean isReal);
+    BigDecimal getBalance(boolean isReal);
 
     boolean isTest(boolean isReal);
 }

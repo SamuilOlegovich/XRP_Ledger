@@ -89,10 +89,11 @@ public class WalletXRP implements Wallet, MyWallets {
     }
 
     @Override
-    public String getBalance() {
+    public BigDecimal getBalance() {
+        getInformationAboutYourAccount();
         return accountInfoResult != null
-                ? accountInfoResult.accountData().balance().toString()
-                :"0000000";
+                ? accountInfoResult.accountData().balance().toXrp()
+                : BigDecimal.ZERO;
     }
 
     @Override
