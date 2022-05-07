@@ -2,6 +2,7 @@ package com.samuilolegovich.model.PaymentManager;
 
 import com.samuilolegovich.enums.StringEnum;
 import com.samuilolegovich.model.sockets.SocketXRP;
+import com.samuilolegovich.model.sockets.SocketXRPTest;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
 
@@ -9,14 +10,18 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class PaymentManagerXRP implements PaymentManager {
+    private SocketXRPTest socketTest;
     private WalletXRPTest walletTest;
-    private WalletXRP wallet;
+
     private SocketXRP socket;
+    private WalletXRP wallet;
+
 
     public PaymentManagerXRP() {
+        this.socketTest = new SocketXRPTest();
         this.walletTest = new WalletXRPTest();
-        this.wallet = new WalletXRP();
         this.socket = new SocketXRP();
+        this.wallet = new WalletXRP();
     }
 
 

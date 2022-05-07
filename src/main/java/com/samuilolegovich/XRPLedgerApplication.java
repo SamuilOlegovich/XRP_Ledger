@@ -4,17 +4,27 @@ import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
 import com.samuilolegovich.model.PaymentManager.PaymentManager;
 import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
+import com.samuilolegovich.model.sockets.SocketXRPTest;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Locale;
 
 
 public class XRPLedgerApplication {
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws Exception {
         // Обязательно стоит установить локаль иначе будет падать с ошибкой парсинга даты
         Locale.setDefault(Locale.ENGLISH);
-        testPayment();
+
+//        testPayment();
+        socketTest();
+    }
+
+    public static void socketTest() throws Exception {
+        SocketXRPTest socketXRPTest = new SocketXRPTest();
+        socketXRPTest.initSocket();
+//        socketXRPTest.initTow();
     }
 
     public static void testPayment() {
