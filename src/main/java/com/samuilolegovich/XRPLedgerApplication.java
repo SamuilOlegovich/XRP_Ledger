@@ -23,8 +23,6 @@ public class XRPLedgerApplication {
 
     public static void socketTest() throws Exception {
         SocketXRPTest socketXRPTest = new SocketXRPTest();
-        socketXRPTest.initSocket();
-//        socketXRPTest.initTow();
     }
 
     public static void testPayment() {

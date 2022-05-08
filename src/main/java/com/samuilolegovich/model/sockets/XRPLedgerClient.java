@@ -1,4 +1,4 @@
-package com.samuilolegovich.model.sockets.git;
+package com.samuilolegovich.model.sockets;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -7,19 +7,32 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
+import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
+import com.samuilolegovich.model.sockets.interfaces.CommandListener;
+import com.samuilolegovich.model.sockets.interfaces.StreamSubscriber;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * A WebSocket client for the XRP ledger.
  * Subscribe to streams with subscribe() or send commands and wait for
  * a response with sendCommand().
+ * Клиент WebSocket для реестра XRP.
+ * Подпишитесь на потоки с помощью subscribe() или отправьте команды и дождитесь ответа с помощью sendCommand().
  */
 public class XRPLedgerClient extends WebSocketClient {
     private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClient.class);
+
+    private volatile boolean closeWhenComplete = false;
+
+    private final Map<StreamSubscriptionEnum, StreamSubscriber> activeSubscriptions = new ConcurrentHashMap<>();
+    private final Map<String, CommandListener> commandListeners = new ConcurrentHashMap<>();
 
     private static final String COMMAND = "command";
     private static final String STREAMS = "streams";
@@ -28,10 +41,7 @@ public class XRPLedgerClient extends WebSocketClient {
     private static final String ATTRIBUTE_TYPE = "type";
     private static final String ATTRIBUTE_ID = "id";
 
-    private final Map<StreamSubscription, StreamSubscriber> activeSubscriptions = new ConcurrentHashMap<>();
-    private final Map<String, CommandListener> commandListeners = new ConcurrentHashMap<>();
 
-    private volatile boolean closeWhenComplete = false;
 
 
 
@@ -69,45 +79,32 @@ public class XRPLedgerClient extends WebSocketClient {
         return id;
     }
 
-    @Override
-    public void send(String message) {
-        LOG.info("Sending message: {}", message);
-        super.send(message);
-    }
-
-    public void subscribe(EnumSet<StreamSubscriptionEnums> streams, StreamSubscriber subscriber) throws InvalidStateException {
+    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, StreamSubscriber subscriber) throws InvalidStateException {
         checkOpen();
         LOG.info("Subscribing to: {}", streams);
         send(composeSubscribe(CMD_SUBSCRIBE, streams));
         streams.forEach(t -> activeSubscriptions.put(t, subscriber));
     }
 
-    public void unsubscribe(EnumSet<StreamSubscriptionEnums> streams) throws InvalidStateException {
+    public void unsubscribe(EnumSet<StreamSubscriptionEnum> streams) throws InvalidStateException {
         checkOpen();
         LOG.info("Unsubscribing from: {}", streams);
         send(composeSubscribe(CMD_UNSUBSCRIBE, streams));
         streams.forEach(t -> activeSubscriptions.remove(t));
     }
 
-    private String composeSubscribe(String command, EnumSet<StreamSubscriptionEnums> streams) {
-        JSONObject request = new JSONObject();
-        request.put(COMMAND, command);
-        request.put(STREAMS, streams.stream().map(t -> t.getName()).collect(Collectors.toList()));
-        return request.toString();
-    }
-
-    private void checkOpen() throws InvalidStateException {
-        if (!isOpen()) {
-            throw new InvalidStateException();
-        }
-    }
-
-    public EnumSet<StreamSubscriptionEnums> getActiveSubscriptions() {
-        return activeSubscriptions.isEmpty() ? EnumSet.noneOf(StreamSubscriptionEnums.class) : EnumSet.copyOf(activeSubscriptions.keySet());
+    public EnumSet<StreamSubscriptionEnum> getActiveSubscriptions() {
+        return activeSubscriptions.isEmpty() ? EnumSet.noneOf(StreamSubscriptionEnum.class) : EnumSet.copyOf(activeSubscriptions.keySet());
     }
 
     public void closeWhenComplete() {
         closeWhenComplete = true;
+    }
+
+    @Override
+    public void send(String message) {
+        LOG.info("Sending message: {}", message);
+        super.send(message);
     }
 
     @Override
@@ -122,8 +119,8 @@ public class XRPLedgerClient extends WebSocketClient {
         LOG.info("XRPL client received a message:\n{}", message);
         JSONObject json = new JSONObject(message);
 
-        if (json.has(ATTRIBUTE_TYPE) && (StreamSubscription.byMessageType(json.getString(ATTRIBUTE_TYPE)) != null)) {
-            StreamSubscription subscription = StreamSubscription.byMessageType(json.getString(ATTRIBUTE_TYPE));
+        if (json.has(ATTRIBUTE_TYPE) && (StreamSubscriptionEnum.byMessageType(json.getString(ATTRIBUTE_TYPE)) != null)) {
+            StreamSubscriptionEnum subscription = StreamSubscriptionEnum.byMessageType(json.getString(ATTRIBUTE_TYPE));
             StreamSubscriber subscriber = activeSubscriptions.get(subscription);
             if (subscriber != null) {
                 subscriber.onSubscription(subscription, json);
@@ -152,5 +149,19 @@ public class XRPLedgerClient extends WebSocketClient {
         LOG.error("XRP ledger client error {}", exception);
         // clear activeSubscriptions and commandListeners?
         // Is onError always followed by an onClose?
+    }
+
+
+    private String composeSubscribe(String command, EnumSet<StreamSubscriptionEnum> streams) {
+        JSONObject request = new JSONObject();
+        request.put(COMMAND, command);
+        request.put(STREAMS, streams.stream().map(t -> t.getName()).collect(Collectors.toList()));
+        return request.toString();
+    }
+
+    private void checkOpen() throws InvalidStateException {
+        if (!isOpen()) {
+            throw new InvalidStateException();
+        }
     }
 }

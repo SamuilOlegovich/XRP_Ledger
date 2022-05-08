@@ -1,4 +1,4 @@
-package com.samuilolegovich.model.sockets.git;
+package com.samuilolegovich.model.sockets.interfaces;
 
 import org.json.JSONObject;
 
