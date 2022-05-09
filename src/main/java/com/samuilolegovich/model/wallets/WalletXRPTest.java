@@ -5,6 +5,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
+import com.samuilolegovich.model.wallets.interfaces.MyWallets;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -58,7 +59,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
     private boolean paymentWasSuccessful = false;
 
     public WalletXRPTest() {
-        if (BooleanEnum.IS_WALLET_TEST.b) { restoreWallet();
+        if (BooleanEnum.IS_WALLET_TEST.isB()) { restoreWallet();
         } else { this.createNewWalletData = createNewWallet(); }
     }
 
@@ -129,7 +130,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
         lookUpYourAccountInfo();
 
         createNewWalletData = Map.of(
-                "Seed", StringEnum.SEED_TEST.value,
+                "Seed", StringEnum.SEED_TEST.getValue(),
                 "Public Key", publicKey(),
                 "Private Key", privateKey().get(),
                 "Classic Address", classicAddress().toString(),
@@ -144,7 +145,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(StringEnum.SEED_TEST.value, true);
+        wallet = walletFactory.fromSeed(StringEnum.SEED_TEST.getValue(), true);
 
         System.out.println("\nWallet:  -->  \n"
                 + "public key  -->  " + wallet.publicKey() + "\n"
@@ -174,7 +175,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
     private void replenishBalanceWallet() {
         // Fund the account using the testnet Faucet
         // Пополните счет с помощью Testnet Faucet
-        FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(StringEnum.FAUCET_CLIENT_HTTP_URL_TEST.value));
+        FaucetClient faucetClient = FaucetClient.construct(HttpUrl.get(StringEnum.FAUCET_CLIENT_HTTP_URL_TEST.getValue()));
         faucetClient.fundAccount(FundAccountRequest.of(wallet.classicAddress()));
         createConnect();
     }
@@ -183,7 +184,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
         try {
             // Connect --------------------------------------------------------
             // Соединять ------------------------------------------------------
-            rippledUrl = HttpUrl.get(StringEnum.NET_TEST.value);
+            rippledUrl = HttpUrl.get(StringEnum.NET_TEST.getValue());
             xrplClient = new XrplClient(rippledUrl);
             System.out.println("Server Info  -- >  " + xrplClient.serverInfo().toString());
         } catch (JsonRpcClientErrorException e) {

@@ -63,7 +63,7 @@ public class PaymentTest implements Runnable {
     @Override
     public void run() {
         // Определяем есть ли у нас сид фраза для кошелька или стоит сгенирировать новый
-        isWallet = BooleanEnum.IS_WALLET.b;
+        isWallet = BooleanEnum.IS_WALLET.isB();
 
 
 
@@ -78,7 +78,7 @@ public class PaymentTest implements Runnable {
             System.out.println(wallet.classicAddress()); // Example: rGCkuB7PBr5tNy68tPEABEtcdno4hE6Y7f
             System.out.println(generationResult.seed()); // Example: sp6JS7f14BuwFY8Mw6bTtLKWauoUs
         } else {
-            wallet = walletFactory.fromSeed(SEED_TEST.value, true);
+            wallet = walletFactory.fromSeed(SEED_TEST.getValue(), true);
         }
 
 
@@ -90,7 +90,7 @@ public class PaymentTest implements Runnable {
 
 
         // Подключение к серверу Testnet *******************************************************************************
-        rippledUrl = HttpUrl.get(NET_TEST.value);
+        rippledUrl = HttpUrl.get(NET_TEST.getValue());
         xrplClient = new XrplClient(rippledUrl);
 
         // Выдаст - HardCodedTarget(type=JsonRpcClient, url=https://s.altnet.rippletest.net:51234/) (test)
@@ -133,7 +133,7 @@ public class PaymentTest implements Runnable {
         payment = Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(ADDRESS_TEST.value))
+                .destination(Address.of(ADDRESS_TEST.getValue()))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())

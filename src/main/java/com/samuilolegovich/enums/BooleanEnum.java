@@ -7,14 +7,14 @@ public enum BooleanEnum {
     IS_REAL(false),
     ;
 
-    public boolean b;
+    private boolean b;
+
     BooleanEnum(boolean b) {
         this.b = b;
     }
 
-    private void setValue(boolean b) {
-        this.b = b;
-    }
+    public boolean isB() { return b; }
+    private void setValue(boolean b) { this.b = b; }
 
     public static void setValue(BooleanEnum enums, boolean b) {
         for (BooleanEnum e : BooleanEnum.values()) {

@@ -13,5 +13,6 @@ public class StreamSubscriberImpl implements StreamSubscriber {
     public void onSubscription(StreamSubscriptionEnum subscription, JSONObject message) {
         LOG.info("subscription returned a {} message", subscription.getMessageType());
         // handle transaction || ledger message
+        // // обработка транзакции || сообщение бухгалтерской книги
     }
 }

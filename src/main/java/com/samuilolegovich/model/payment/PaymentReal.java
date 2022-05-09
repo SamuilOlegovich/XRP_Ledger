@@ -64,7 +64,7 @@ public class PaymentReal implements Runnable {
     public void run() {
         // Determine if we have a seed phrase for the wallet or is it worth generating a new one
         // Определяем есть ли у нас сид фраза для кошелька или стоит сгенирировать новый
-        isWallet = BooleanEnum.IS_WALLET.b;
+        isWallet = BooleanEnum.IS_WALLET.isB();
 
 
         // Credential example
@@ -81,7 +81,7 @@ public class PaymentReal implements Runnable {
             System.out.println(wallet.classicAddress()); // Example: rGCkuB7PBr5tNy68tPEABEtcdno4hE6Y7f
             System.out.println(generationResult.seed()); // Example: sp6JS7f14BuwFY8Mw6bTtLKWauoUs
         } else {
-            wallet = walletFactory.fromSeed(SEED_REAL.value, true);
+            wallet = walletFactory.fromSeed(SEED_REAL.getValue(), true);
         }
 
 
@@ -96,7 +96,7 @@ public class PaymentReal implements Runnable {
 
         // Server connection
         // Подключение к серверу ***************************************************************************************
-        rippledUrl = HttpUrl.get(NET_REAL.value);
+        rippledUrl = HttpUrl.get(NET_REAL.getValue());
         xrplClient = new XrplClient(rippledUrl);
 
         // Will issue
@@ -146,7 +146,7 @@ public class PaymentReal implements Runnable {
         payment = org.xrpl.xrpl4j.model.transactions.Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(ADDRESS_REAL.value))
+                .destination(Address.of(ADDRESS_REAL.getValue()))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())

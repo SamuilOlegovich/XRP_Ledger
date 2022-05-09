@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 public class XRPLedgerClient extends WebSocketClient {
     private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClient.class);
 
-    private volatile boolean closeWhenComplete = false;
-
     private final Map<StreamSubscriptionEnum, StreamSubscriber> activeSubscriptions = new ConcurrentHashMap<>();
     private final Map<String, CommandListener> commandListeners = new ConcurrentHashMap<>();
+
+    private volatile boolean closeWhenComplete = false;
 
     private static final String COMMAND = "command";
     private static final String STREAMS = "streams";

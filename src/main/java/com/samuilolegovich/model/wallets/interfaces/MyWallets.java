@@ -1,4 +1,4 @@
-package com.samuilolegovich.model.wallets;
+package com.samuilolegovich.model.wallets.interfaces;
 
 import java.math.BigDecimal;
 import java.util.Map;

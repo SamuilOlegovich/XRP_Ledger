@@ -5,6 +5,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
+import com.samuilolegovich.model.wallets.interfaces.MyWallets;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -56,7 +57,7 @@ public class WalletXRP implements Wallet, MyWallets {
 
 
     public WalletXRP() {
-        if (BooleanEnum.IS_WALLET.b) { restoreWallet();
+        if (BooleanEnum.IS_WALLET.isB()) { restoreWallet();
         } else {
             this.createNewWalletData = createNewWallet();
         }
@@ -123,7 +124,7 @@ public class WalletXRP implements Wallet, MyWallets {
         getInformationAboutYourAccount();
 
         createNewWalletData = Map.of(
-                "Seed", StringEnum.SEED_REAL.value,
+                "Seed", StringEnum.SEED_REAL.getValue(),
                 "Public Key", publicKey(),
                 "Private Key", privateKey().get(),
                 "Classic Address", classicAddress().toString(),
@@ -139,7 +140,7 @@ public class WalletXRP implements Wallet, MyWallets {
 
     public Map<String, String> restoreWallet() {
         walletFactory = DefaultWalletFactory.getInstance();
-        wallet = walletFactory.fromSeed(StringEnum.SEED_REAL.value, true);
+        wallet = walletFactory.fromSeed(StringEnum.SEED_REAL.getValue(), true);
 
         // Get the Classic address from wallet
         // Получите классический адрес из wallet
@@ -299,7 +300,7 @@ public class WalletXRP implements Wallet, MyWallets {
     private void createConnect() {
         // Connect --------------------------------------------------------
         // Соединять ------------------------------------------------------
-        rippledUrl = HttpUrl.get(StringEnum.POST_URL_ONE.value);
+        rippledUrl = HttpUrl.get(StringEnum.POST_URL_ONE.getValue());
         xrplClient = new XrplClient(rippledUrl);
     }
 
