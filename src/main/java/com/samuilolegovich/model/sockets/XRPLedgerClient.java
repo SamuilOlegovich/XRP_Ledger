@@ -27,20 +27,19 @@ import org.slf4j.LoggerFactory;
  * Подпишитесь на потоки с помощью subscribe() или отправьте команды и дождитесь ответа с помощью sendCommand().
  */
 public class XRPLedgerClient extends WebSocketClient {
-    private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClient.class);
-
     private final Map<StreamSubscriptionEnum, StreamSubscriber> activeSubscriptions = new ConcurrentHashMap<>();
     private final Map<String, CommandListener> commandListeners = new ConcurrentHashMap<>();
 
-    private volatile boolean closeWhenComplete = false;
+    private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClient.class);
 
-    private static final String COMMAND = "command";
-    private static final String STREAMS = "streams";
-    private static final String CMD_SUBSCRIBE = "subscribe";
     private static final String CMD_UNSUBSCRIBE = "unsubscribe";
+    private static final String CMD_SUBSCRIBE = "subscribe";
     private static final String ATTRIBUTE_TYPE = "type";
     private static final String ATTRIBUTE_ID = "id";
+    private static final String COMMAND = "command";
+    private static final String STREAMS = "streams";
 
+    private volatile boolean closeWhenComplete = false;
 
 
 
@@ -53,29 +52,25 @@ public class XRPLedgerClient extends WebSocketClient {
         this(new URI(serverUri));
     }
 
-
-
+    // ---->>>
     public String sendCommand(String command, CommandListener listener) throws InvalidStateException {
         return sendCommand(command, null, listener);
     }
 
+    // ---->>>
     public String sendCommand(String command, Map<String, Object> parameters, CommandListener listener) throws InvalidStateException {
         checkOpen();
+
         String id = UUID.randomUUID().toString();
 
         JSONObject request = new JSONObject();
         request.put(COMMAND, command);
         request.put("id", id);
 
-        if (parameters != null && !parameters.isEmpty()) {
-            parameters.entrySet().stream().forEach(
-                    t -> request.put(t.getKey(), t.getValue())
-            );
-        }
+        if (parameters != null && !parameters.isEmpty()) { parameters.forEach(request::put); }
 
         send(request.toString());
         commandListeners.put(id, listener);
-
         return id;
     }
 
@@ -155,7 +150,7 @@ public class XRPLedgerClient extends WebSocketClient {
     private String composeSubscribe(String command, EnumSet<StreamSubscriptionEnum> streams) {
         JSONObject request = new JSONObject();
         request.put(COMMAND, command);
-        request.put(STREAMS, streams.stream().map(t -> t.getName()).collect(Collectors.toList()));
+        request.put(STREAMS, streams.stream().map(StreamSubscriptionEnum::getName).collect(Collectors.toList()));
         return request.toString();
     }
 

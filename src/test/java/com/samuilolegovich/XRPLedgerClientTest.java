@@ -3,7 +3,10 @@ package com.samuilolegovich;
 import com.samuilolegovich.model.sockets.XRPLedgerClient;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
+import feign.Response;
+import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,10 +18,18 @@ import java.util.concurrent.TimeUnit;
 
 
 public class XRPLedgerClientTest {
-    private XRPLedgerClient client;
-    private List<String> transactions;
-
     private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClientTest.class);
+
+    private final String RESPONSE ="response";
+    private final String SUCCESS ="success";
+    private final String STATUS ="status";
+    private final String TYPE ="type";
+    private final String ID ="id";
+
+    private List<String> transactions;
+    private XRPLedgerClient client;
+    private String idCommand;
+
 
     @Before
     public void startClient() throws URISyntaxException, InterruptedException {
@@ -33,10 +44,13 @@ public class XRPLedgerClientTest {
     public void sendCommand() throws InvalidStateException {
         // Send a command.
         // Отправить команду *******************************************************************************************
-        client.sendCommand("ledger_current", (response) -> {
-            LOG.info(response.toString(4));
+         idCommand = client.sendCommand("ledger_current", (response) -> {
+             Assert.assertEquals(SUCCESS, response.getString(STATUS));
+             Assert.assertEquals(RESPONSE, response.getString(TYPE));
+             Assert.assertEquals(idCommand, response.getString(ID));
+             LOG.info(response.toString(4));
+             conclusionAboutPositiveResult();
         });
-        conclusionAboutPositiveResult();
     }
 
     @Test
@@ -45,10 +59,13 @@ public class XRPLedgerClientTest {
         // Отправить команду с параметрами *****************************************************************************
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("ledger_index", "validated");
-        client.sendCommand("ledger", parameters, (response) -> {
+        idCommand = client.sendCommand("ledger", parameters, (response) -> {
+            Assert.assertEquals(SUCCESS, response.getString(STATUS));
+            Assert.assertEquals(RESPONSE, response.getString(TYPE));
+            Assert.assertEquals(idCommand, response.getString(ID));
             LOG.info(response.toString(4));
+            conclusionAboutPositiveResult();
         });
-        conclusionAboutPositiveResult();
     }
 
     @Test

@@ -14,15 +14,15 @@ import java.util.Locale;
 
 public class PaymentManagerXRPTest {
     private PaymentManager paymentManager;
-    private String xAddress;
     private String classicAddress;
     private String privateKey;
     private String publicKey;
+    private String xAddress;
     private String seed;
 
     private BigDecimal allBalanceBefore;
-    private BigDecimal balanceBefore;
     private BigDecimal allBalanceAfter;
+    private BigDecimal balanceBefore;
     private BigDecimal balanceAfter;
 
 
@@ -46,13 +46,13 @@ public class PaymentManagerXRPTest {
         createPaymentManager();
         initBeforePay();
 
-        Assert.assertNotNull(xAddress);
+        Assert.assertNotNull(allBalanceBefore);
         Assert.assertNotNull(classicAddress);
+        Assert.assertNotNull(balanceBefore);
         Assert.assertNotNull(privateKey);
         Assert.assertNotNull(publicKey);
+        Assert.assertNotNull(xAddress);
         Assert.assertNotNull(seed);
-        Assert.assertNotNull(allBalanceBefore);
-        Assert.assertNotNull(balanceBefore);
 
         Assert.assertNotEquals(seed, "Это не новый кошелек, у вас уже есть востановительная фраза");
         Assert.assertEquals(1, allBalanceBefore.compareTo(balanceBefore));
@@ -65,8 +65,8 @@ public class PaymentManagerXRPTest {
         Assert.assertNotNull(balanceAfter);
 
         Assert.assertEquals(1, allBalanceBefore.compareTo(allBalanceAfter));
-        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
         Assert.assertEquals(1, allBalanceAfter.compareTo(balanceAfter));
+        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
 
         printIIfoAfter();
         conclusionAboutPositiveResult();
@@ -83,13 +83,13 @@ public class PaymentManagerXRPTest {
         createPaymentManager();
         initBeforePay();
 
-        Assert.assertNotNull(xAddress);
+        Assert.assertNotNull(allBalanceBefore);
         Assert.assertNotNull(classicAddress);
+        Assert.assertNotNull(balanceBefore);
         Assert.assertNotNull(privateKey);
         Assert.assertNotNull(publicKey);
+        Assert.assertNotNull(xAddress);
         Assert.assertNotNull(seed);
-        Assert.assertNotNull(allBalanceBefore);
-        Assert.assertNotNull(balanceBefore);
 
         Assert.assertEquals(seed, "Это не новый кошелек, у вас уже есть востановительная фраза");
         Assert.assertEquals(1, allBalanceBefore.compareTo(balanceBefore));
@@ -102,8 +102,8 @@ public class PaymentManagerXRPTest {
         Assert.assertNotNull(balanceAfter);
 
         Assert.assertEquals(1, allBalanceBefore.compareTo(allBalanceAfter));
-        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
         Assert.assertEquals(1, allBalanceAfter.compareTo(balanceAfter));
+        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
 
         printIIfoAfter();
         conclusionAboutPositiveResult();
@@ -119,13 +119,13 @@ public class PaymentManagerXRPTest {
         createPaymentManager();
         initBeforePay();
 
-        Assert.assertNotNull(xAddress);
+        Assert.assertNotNull(allBalanceBefore);
         Assert.assertNotNull(classicAddress);
+        Assert.assertNotNull(balanceBefore);
         Assert.assertNotNull(privateKey);
         Assert.assertNotNull(publicKey);
+        Assert.assertNotNull(xAddress);
         Assert.assertNotNull(seed);
-        Assert.assertNotNull(allBalanceBefore);
-        Assert.assertNotNull(balanceBefore);
 
         Assert.assertNotEquals(seed, "Это не новый кошелек, у вас уже есть востановительная фраза");
         Assert.assertEquals(0, allBalanceBefore.compareTo(balanceBefore));
@@ -146,13 +146,13 @@ public class PaymentManagerXRPTest {
         createPaymentManager();
         initBeforePay();
 
-        Assert.assertNotNull(xAddress);
+        Assert.assertNotNull(allBalanceBefore);
         Assert.assertNotNull(classicAddress);
+        Assert.assertNotNull(balanceBefore);
         Assert.assertNotNull(privateKey);
         Assert.assertNotNull(publicKey);
+        Assert.assertNotNull(xAddress);
         Assert.assertNotNull(seed);
-        Assert.assertNotNull(allBalanceBefore);
-        Assert.assertNotNull(balanceBefore);
 
         Assert.assertEquals(seed, "Это не новый кошелек, у вас уже есть востановительная фраза");
         Assert.assertEquals(1, allBalanceBefore.compareTo(balanceBefore));
@@ -164,9 +164,9 @@ public class PaymentManagerXRPTest {
         Assert.assertNotNull(allBalanceAfter);
         Assert.assertNotNull(balanceAfter);
 
-        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
-        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
         Assert.assertEquals(1, allBalanceAfter.compareTo(balanceAfter));
+        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
+        Assert.assertEquals(1, balanceBefore.compareTo(balanceAfter));
 
         printIIfoAfter();
         conclusionAboutPositiveResult();
@@ -177,10 +177,10 @@ public class PaymentManagerXRPTest {
     }
 
     private void initBeforePay() {
-        xAddress = paymentManager.getXAddress(BooleanEnum.IS_REAL.isB());
         classicAddress = paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB());
         privateKey = paymentManager.getPrivateKey(BooleanEnum.IS_REAL.isB());
         publicKey = paymentManager.getPublicKey(BooleanEnum.IS_REAL.isB());
+        xAddress = paymentManager.getXAddress(BooleanEnum.IS_REAL.isB());
         seed = paymentManager.getSeed(BooleanEnum.IS_REAL.isB());
 
         allBalanceBefore = paymentManager.getAllBalance(BooleanEnum.IS_REAL.isB());
@@ -203,10 +203,10 @@ public class PaymentManagerXRPTest {
 
     private void printIIfoBefore() {
         System.out.println("*****************************************************************************************");
-        System.out.println("X Address  -- >  " + xAddress);
         System.out.println("Classic Address  -- >  " + classicAddress);
         System.out.println("Private Key  -- >  " + privateKey);
         System.out.println("Public Key  -- >  " + publicKey);
+        System.out.println("X Address  -- >  " + xAddress);
         System.out.println("Seed  -- >  " + seed);
         System.out.println("*****************************************************************************************");
         System.out.println("All Balance Before -- >  " + allBalanceBefore);
