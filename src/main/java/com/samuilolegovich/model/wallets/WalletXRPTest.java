@@ -40,6 +40,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class WalletXRPTest implements Wallet, MyWallets {
+    private final static String RESULT = "result";
+    private final static String SUCCESS = "success";
+    private final static String TES_SUCCESS = "tesSUCCESS";
+    private final static String METHOD_GET_TRANSACTION = "/v2/accounts/{0}/transactions";
+    private final static String METHOD_GET_BALANCE = "/v2/accounts/{0}/balances";
+    private final static String METHOD_POST_SIGN = "sign";
+
     private AccountInfoRequestParams accountInfoRequestParams;
     private SeedWalletGenerationResult generationResult;
     private AccountInfoResult accountInfoResult;
@@ -86,7 +93,7 @@ public class WalletXRPTest implements Wallet, MyWallets {
 
     @Override
     public boolean isTest() {
-        return false;
+        return true;
     }
 
     @Override
@@ -100,15 +107,6 @@ public class WalletXRPTest implements Wallet, MyWallets {
         if (createNewWalletData != null) { return generationResult.seed(); }
         return "Это не новый кошелек, у вас уже есть востановительная фраза";
     }
-
-    private final static String RESULT = "result";
-    private final static String SUCCESS = "success";
-    private final static String TES_SUCCESS = "tesSUCCESS";
-    private final static String METHOD_GET_TRANSACTION = "/v2/accounts/{0}/transactions";
-    private final static String METHOD_GET_BALANCE = "/v2/accounts/{0}/balances";
-    private final static String METHOD_POST_SIGN = "sign";
-
-
 
     @Override
     public Map<String, String> createNewWallet() {

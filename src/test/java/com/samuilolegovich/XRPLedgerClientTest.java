@@ -36,6 +36,7 @@ public class XRPLedgerClientTest {
         client.sendCommand("ledger_current", (response) -> {
             LOG.info(response.toString(4));
         });
+        conclusionAboutPositiveResult();
     }
 
     @Test
@@ -47,6 +48,7 @@ public class XRPLedgerClientTest {
         client.sendCommand("ledger", parameters, (response) -> {
             LOG.info(response.toString(4));
         });
+        conclusionAboutPositiveResult();
     }
 
     @Test
@@ -57,6 +59,7 @@ public class XRPLedgerClientTest {
             LOG.info("Получил сообщение от подписки {}: {}", subscription.getMessageType(), message);
             transactions.add(message.toString());
         });
+        conclusionAboutPositiveResult();
     }
 
     @After
@@ -84,9 +87,15 @@ public class XRPLedgerClientTest {
         }
     }
 
-
-
-
-
-
+    private void conclusionAboutPositiveResult() {
+        System.out.println("\n" + "\n"
+                + "********************************************" + "\n"
+                + "********************************************" + "\n"
+                + "*******                              *******" + "\n"
+                + "*******     ТЕСТ ПРОЙДЕН ОТЛИЧНО     *******" + "\n"
+                + "*******                              *******" + "\n"
+                + "********************************************" + "\n"
+                + "********************************************" + "\n"
+                + "\n" + "\n");
+    }
 }
