@@ -194,7 +194,7 @@ public class PaymentManagerXRPTest {
 
     private void makePayment() {
         paymentManager.sendPayment(BooleanEnum.IS_REAL.isB()
-                        ? StringEnum.ADDRESS_REAL.getValue()
+                        ? StringEnum.ADDRESS_FOR_SEND_REAL.getValue()
                         : StringEnum.ADDRESS_TEST.getValue(),
                 777,
                 BigDecimal.ONE,
@@ -223,13 +223,14 @@ public class PaymentManagerXRPTest {
 
     private void conclusionAboutPositiveResult() {
         System.out.println("\n" + "\n"
-                + "********************************************" + "\n"
-                + "********************************************" + "\n"
-                + "*******                              *******" + "\n"
-                + "*******     ТЕСТ ПРОЙДЕН ОТЛИЧНО     *******" + "\n"
-                + "*******                              *******" + "\n"
-                + "********************************************" + "\n"
-                + "********************************************" + "\n"
+                + "*********************************************" + "\n"
+                + "*********************************************" + "\n"
+                + "*******                               *******" + "\n"
+                + "*******     TEST PASSED EXCELLENT     *******" + "\n"
+                + "*******     ТЕСТ ПРОЙДЕН ОТЛИЧНО!     *******" + "\n"
+                + "*******                               *******" + "\n"
+                + "*********************************************" + "\n"
+                + "*********************************************" + "\n"
                 + "\n" + "\n");
     }
 }

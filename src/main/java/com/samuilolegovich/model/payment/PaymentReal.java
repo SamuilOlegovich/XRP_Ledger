@@ -96,7 +96,7 @@ public class PaymentReal implements Runnable {
 
         // Server connection
         // Подключение к серверу ***************************************************************************************
-        rippledUrl = HttpUrl.get(NET_REAL.getValue());
+        rippledUrl = HttpUrl.get(NET_REAL_POST_URL_ONE.getValue());
         xrplClient = new XrplClient(rippledUrl);
 
         // Will issue
@@ -146,7 +146,7 @@ public class PaymentReal implements Runnable {
         payment = org.xrpl.xrpl4j.model.transactions.Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(ADDRESS_REAL.getValue()))
+                .destination(Address.of(ADDRESS_FOR_SEND_REAL.getValue()))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())

@@ -300,7 +300,7 @@ public class WalletXRP implements Wallet, MyWallets {
     private void createConnect() {
         // Connect --------------------------------------------------------
         // Соединять ------------------------------------------------------
-        rippledUrl = HttpUrl.get(StringEnum.POST_URL_ONE.getValue());
+        rippledUrl = HttpUrl.get(StringEnum.NET_REAL_POST_URL_ONE.getValue());
         xrplClient = new XrplClient(rippledUrl);
     }
 

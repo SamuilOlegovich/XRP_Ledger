@@ -6,7 +6,9 @@ import java.util.Map;
 public enum StreamSubscriptionEnum {
     SERVER("server", "serverStatus"),
     LEDGER("ledger", "ledgerClosed"),
-    TRANSACTIONS("transactions", "transaction");
+    TRANSACTIONS("transactions", "transaction"),
+    ACCOUNT_CHANNELS("accounts", "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"),
+    ;
 
     private final String responseMessageType;
     private final String name;

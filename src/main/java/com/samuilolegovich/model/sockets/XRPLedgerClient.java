@@ -58,9 +58,9 @@ public class XRPLedgerClient extends WebSocketClient {
     }
 
     // ---->>>
-    public String sendCommand(String command, Map<String, Object> parameters, CommandListener listener) throws InvalidStateException {
+    public String sendCommand(String command, Map<String, Object> parameters, CommandListener listener)
+            throws InvalidStateException {
         checkOpen();
-
         String id = UUID.randomUUID().toString();
 
         JSONObject request = new JSONObject();
@@ -74,12 +74,23 @@ public class XRPLedgerClient extends WebSocketClient {
         return id;
     }
 
-    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, StreamSubscriber subscriber) throws InvalidStateException {
+    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, StreamSubscriber subscriber)
+            throws InvalidStateException {
         checkOpen();
         LOG.info("Subscribing to: {}", streams);
         send(composeSubscribe(CMD_SUBSCRIBE, streams));
         streams.forEach(t -> activeSubscriptions.put(t, subscriber));
     }
+
+    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, Map<String, Object> parameters,
+                          StreamSubscriber subscriber) throws InvalidStateException {
+        checkOpen();
+        LOG.info("Subscribing to: {}", streams);
+        send(composeSubscribe(CMD_SUBSCRIBE, parameters, streams));
+        streams.forEach(t -> activeSubscriptions.put(t, subscriber));
+    }
+
+
 
     public void unsubscribe(EnumSet<StreamSubscriptionEnum> streams) throws InvalidStateException {
         checkOpen();
@@ -89,7 +100,9 @@ public class XRPLedgerClient extends WebSocketClient {
     }
 
     public EnumSet<StreamSubscriptionEnum> getActiveSubscriptions() {
-        return activeSubscriptions.isEmpty() ? EnumSet.noneOf(StreamSubscriptionEnum.class) : EnumSet.copyOf(activeSubscriptions.keySet());
+        return activeSubscriptions.isEmpty()
+                ? EnumSet.noneOf(StreamSubscriptionEnum.class)
+                : EnumSet.copyOf(activeSubscriptions.keySet());
     }
 
     public void closeWhenComplete() {
@@ -114,7 +127,8 @@ public class XRPLedgerClient extends WebSocketClient {
         LOG.info("XRPL client received a message:\n{}", message);
         JSONObject json = new JSONObject(message);
 
-        if (json.has(ATTRIBUTE_TYPE) && (StreamSubscriptionEnum.byMessageType(json.getString(ATTRIBUTE_TYPE)) != null)) {
+        if (json.has(ATTRIBUTE_TYPE)
+                && (StreamSubscriptionEnum.byMessageType(json.getString(ATTRIBUTE_TYPE)) != null)) {
             StreamSubscriptionEnum subscription = StreamSubscriptionEnum.byMessageType(json.getString(ATTRIBUTE_TYPE));
             StreamSubscriber subscriber = activeSubscriptions.get(subscription);
             if (subscriber != null) {
@@ -151,6 +165,15 @@ public class XRPLedgerClient extends WebSocketClient {
         JSONObject request = new JSONObject();
         request.put(COMMAND, command);
         request.put(STREAMS, streams.stream().map(StreamSubscriptionEnum::getName).collect(Collectors.toList()));
+        return request.toString();
+    }
+
+    private String composeSubscribe(String command, Map<String, Object> parameters,
+                                    EnumSet<StreamSubscriptionEnum> streams) {
+        JSONObject request = new JSONObject();
+        request.put(COMMAND, command);
+        request.put(STREAMS, streams.stream().map(StreamSubscriptionEnum::getName).collect(Collectors.toList()));
+        if (parameters != null && !parameters.isEmpty()) { parameters.forEach(request::put); }
         return request.toString();
     }
 
