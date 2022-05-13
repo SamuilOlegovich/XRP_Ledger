@@ -195,7 +195,7 @@ public class PaymentManagerXRPTest {
     private void makePayment() {
         paymentManager.sendPayment(BooleanEnum.IS_REAL.isB()
                         ? StringEnum.ADDRESS_FOR_SEND_REAL.getValue()
-                        : StringEnum.ADDRESS_TEST.getValue(),
+                        : StringEnum.ADDRESS_FOR_SEND_TEST.getValue(),
                 777,
                 BigDecimal.ONE,
                 BooleanEnum.IS_REAL.isB());

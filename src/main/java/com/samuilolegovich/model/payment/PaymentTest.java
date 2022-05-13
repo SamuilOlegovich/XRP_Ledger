@@ -133,7 +133,7 @@ public class PaymentTest implements Runnable {
         payment = Payment.builder()
                 .account(classicAddress)
                 .amount(XrpCurrencyAmount.ofXrp(BigDecimal.ONE))
-                .destination(Address.of(ADDRESS_TEST.getValue()))
+                .destination(Address.of(ADDRESS_FOR_SEND_TEST.getValue()))
                 .sequence(sequence)
                 .fee(openLedgerFee)
                 .signingPublicKey(wallet.publicKey())

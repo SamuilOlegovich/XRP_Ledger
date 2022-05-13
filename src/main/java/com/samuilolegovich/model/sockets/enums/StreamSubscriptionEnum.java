@@ -7,7 +7,8 @@ public enum StreamSubscriptionEnum {
     SERVER("server", "serverStatus"),
     LEDGER("ledger", "ledgerClosed"),
     TRANSACTIONS("transactions", "transaction"),
-    ACCOUNT_CHANNELS("accounts", "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"),
+    ACCOUNT_CHANNELS("ledger", "transaction"),
+//    ACCOUNT_CHANNELS("accounts", "transaction"),
     ;
 
     private final String responseMessageType;

@@ -1,6 +1,8 @@
 package com.samuilolegovich;
 
+import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
+import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
 import com.samuilolegovich.model.sockets.XRPLedgerClient;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
@@ -11,12 +13,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static com.samuilolegovich.enums.StringEnum.ADDRESS_FOR_SUBSCRIBE_AND_MONITOR;
-import static com.samuilolegovich.enums.StringEnum.WSS_REAL;
+import static com.samuilolegovich.enums.StringEnum.*;
 
 
 public class XRPLedgerClientTest {
@@ -27,7 +29,11 @@ public class XRPLedgerClientTest {
     private final String STATUS ="status";
     private final String TYPE ="type";
     private final String ID ="id";
+    private final int TAG = 777;
 
+    private int transactionsSize = 100;
+
+    private PaymentManagerXRP paymentManager;
     private List<String> transactions;
     private XRPLedgerClient client;
     private String idCommand;
@@ -37,9 +43,13 @@ public class XRPLedgerClientTest {
     public void startClient() throws URISyntaxException, InterruptedException {
         // Get a client.
         // Получите клиента ********************************************************************************************
+        transactions = new ArrayList<>();
+        Locale.setDefault(Locale.ENGLISH);
+        BooleanEnum.setValue(BooleanEnum.IS_REAL, false);
+        BooleanEnum.setValue(BooleanEnum.IS_WALLET_TEST, false);
+
         client = new XRPLedgerClient(WSS_REAL.getValue());
         client.connectBlocking(3000, TimeUnit.MILLISECONDS);
-        transactions = new ArrayList<>();
     }
 
     @Test
@@ -84,7 +94,6 @@ public class XRPLedgerClientTest {
             Assert.assertEquals(SUCCESS, response.getString(STATUS));
             Assert.assertEquals(RESPONSE, response.getString(TYPE));
             Assert.assertEquals(idCommand, response.getString(ID));
-            Assert.assertEquals("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn", response.getString("account"));
             Assert.assertEquals("true", response.getString("validated"));
             LOG.info(response.toString(4));
             conclusionAboutPositiveResult();
@@ -175,19 +184,51 @@ public class XRPLedgerClientTest {
     }
 
     @Test
-    public void subscribeToTheAccountTransactionStream() throws InvalidStateException {
-        // Send a command with parameters.
-        // Отправить команду с параметрами *****************************************************************************
-        Map<String, Object> parameters = new HashMap<>();
-        List<String> list = List.of(ADDRESS_FOR_SUBSCRIBE_AND_MONITOR.getValue());
-        parameters.put("accounts", list);
+    public void subscribeToTheAccountTransactionStream() throws InvalidStateException,
+            URISyntaxException,
+            InterruptedException {
+        // Subscribe to the stream of wallet balance changes.
+        // Подписаться на стрим изменения баланса кошелька *************************************************************
+        client.close();
+        client = new XRPLedgerClient(WSS_TEST.getValue());
+        client.connectBlocking(3000, TimeUnit.MILLISECONDS);
+        transactionsSize = 1;
 
-        client.subscribe(EnumSet.of(StreamSubscriptionEnum.LEDGER), parameters, (subscription, message) -> {
-            System.out.println("message --->>>" + message.toString());
+        createPaymentManager();
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("accounts", List.of(paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB())));
+
+        client.subscribe(EnumSet.of(StreamSubscriptionEnum.ACCOUNT_CHANNELS), parameters, (subscription, message) -> {
+            if (message.has("engine_result")
+                    && message.has("transaction")
+                    && message.getJSONObject("transaction").has("DestinationTag")
+                    && message.getJSONObject("transaction").getInt("DestinationTag") == TAG) {
+
+                Assert.assertEquals(TAG, message.getJSONObject("transaction").getInt("DestinationTag"));
+                Assert.assertEquals("tesSUCCESS", message.getString("engine_result"));
+                Assert.assertEquals("transaction",message.getString("type"));
+                Assert.assertEquals(0, message.getInt("engine_result_code"));
+                Assert.assertTrue(message.getBoolean("validated"));
+
+                Assert.assertEquals("The transaction was applied. Only final in a validated ledger.",
+                        message.getString("engine_result_message"));
+                Assert.assertEquals(paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB()),
+                        message.getJSONObject("transaction").getString("Account"));
+                Assert.assertEquals(ADDRESS_FOR_SEND_TEST.getValue(),
+                        message.getJSONObject("transaction").getString("Destination"));
+                Assert.assertEquals("Payment",
+                        message.getJSONObject("transaction").getString("TransactionType"));
+
+                conclusionAboutPositiveResult();
+            }
+
             LOG.info("Получил сообщение от подписки {}: {}", subscription.getMessageType(), message);
             transactions.add(message.toString());
         });
-        conclusionAboutPositiveResult();
+        Thread.sleep(15000);
+        makePayment();
+        Thread.sleep(15000);
     }
 
     @After
@@ -209,10 +250,27 @@ public class XRPLedgerClientTest {
         while (client.isOpen()) {
             LOG.info("Ожидание сообщений (транзакции получены: {})...", transactions.size());
             Thread.sleep(100);
-            if (transactions.size() >= 100 && !client.getActiveSubscriptions().isEmpty()) {
+            if (transactions.size() >= transactionsSize && !client.getActiveSubscriptions().isEmpty()) {
                 client.unsubscribe(client.getActiveSubscriptions());
             }
         }
+    }
+
+    private void createPaymentManager() {
+        LOG.info("Создаем менеджера платежей.");
+        paymentManager = new PaymentManagerXRP();
+        LOG.info("Менеджер платежей создан.");
+    }
+
+    private void makePayment() {
+        LOG.info("Создаем платеж.");
+        paymentManager.sendPayment(BooleanEnum.IS_REAL.isB()
+                        ? StringEnum.ADDRESS_FOR_SEND_REAL.getValue()
+                        : StringEnum.ADDRESS_FOR_SEND_TEST.getValue(),
+                TAG,
+                BigDecimal.TEN,
+                BooleanEnum.IS_REAL.isB());
+        LOG.info("Платеж создан.");
     }
 
     private void conclusionAboutPositiveResult() {
