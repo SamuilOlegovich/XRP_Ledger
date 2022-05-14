@@ -6,36 +6,52 @@ import com.samuilolegovich.model.PaymentManager.interfaces.PaymentManager;
 import com.samuilolegovich.model.PaymentManager.interfaces.Presets;
 import com.samuilolegovich.model.PaymentManager.interfaces.SocketManager;
 import com.samuilolegovich.model.sockets.SocketXRP;
+import com.samuilolegovich.model.sockets.SocketXRPTest;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
 import com.samuilolegovich.model.sockets.interfaces.CommandListener;
 import com.samuilolegovich.model.sockets.interfaces.StreamSubscriber;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
+import org.java_websocket.client.WebSocketClient;
 
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 
 public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManager, Presets {
-    private final WalletXRPTest walletTest;
+    private WalletXRPTest walletTest;
+    private SocketXRPTest socketTest;
 
     private SocketXRP socket;
     private WalletXRP wallet;
 
 
     public PaymentAndSocketManagerXRPL() {
-        this.walletTest = new WalletXRPTest();
-        this.socket = createNewSocket();
-        this.wallet = new WalletXRP();
+            this.socketTest = (SocketXRPTest) createNewSocket(false);
+            this.socket = (SocketXRP) createNewSocket(true);
+            this.walletTest = new WalletXRPTest();
+            this.wallet = new WalletXRP();
     }
 
-    private SocketXRP createNewSocket() {
+    // подумать может более элегантно сделать проверку на нул - так чтобы не отдавать его дальше ***********************
+    public PaymentAndSocketManagerXRPL(boolean isRealOrTest) {
+        if (isRealOrTest) {
+            this.socket = (SocketXRP) createNewSocket(isRealOrTest);
+            this.wallet = new WalletXRP();
+        } else {
+            this.socketTest = (SocketXRPTest) createNewSocket(isRealOrTest);
+            this.walletTest = new WalletXRPTest();
+        }
+    }
+
+    private WebSocketClient createNewSocket(boolean b) {
         try {
-            return new SocketXRP(BooleanEnum.IS_REAL.isB()
-                    ? StringEnum.WSS_REAL.getValue()
-                    : StringEnum.WSS_TEST.getValue());
+            return b
+                    ? new SocketXRP(StringEnum.WSS_REAL.getValue())
+                    : new SocketXRPTest(StringEnum.WSS_TEST.getValue());
         } catch (URISyntaxException e) { e.printStackTrace(); }
         return null;
     }
@@ -46,30 +62,39 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
 
     @Override
     public void sendPayment(String address, Integer tag, BigDecimal numberOfXRP, boolean isReal) {
-        if (isReal) { wallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
-        } else { walletTest.sendPaymentToAddressXRP(address, tag, numberOfXRP); }
+        if (isReal && wallet != null) { wallet.sendPaymentToAddressXRP(address, tag, numberOfXRP);
+        } else if (walletTest != null) { walletTest.sendPaymentToAddressXRP(address, tag, numberOfXRP); }
     }
 
     @Override
     public Map<String, String> connectAnExistingWallet(String seed, boolean isReal) {
-        if (isReal) {
+        if (isReal && wallet != null) {
             StringEnum.setValue(StringEnum.SEED_REAL, seed);
             return wallet.restoreWallet();
+        } else if (walletTest != null) {
+            StringEnum.setValue(StringEnum.SEED_TEST, seed);
+            return walletTest.restoreWallet();
         }
-        StringEnum.setValue(StringEnum.SEED_TEST, seed);
-        return walletTest.restoreWallet();
+        return new HashMap<>();
     }
 
     @Override
     public Map<String, String> createNewWallet(boolean isReal) {
-        if (isReal) { return wallet.createNewWallet(); }
-        return walletTest.createNewWallet();
+        if (isReal && wallet != null) {
+            return wallet.createNewWallet();
+        } else if (walletTest != null) {
+            return walletTest.createNewWallet();
+        }
+        return new HashMap<>();
     }
 
     @Override
     public void updateWallet(boolean isReal) {
-        if (isReal) { wallet.restoreWallet();
-        } else { walletTest.restoreWallet(); }
+        if (isReal && wallet != null) {
+            wallet.restoreWallet();
+        } else if (walletTest != null) {
+            walletTest.restoreWallet();
+        }
     }
 
     @Override
@@ -79,38 +104,62 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
 
     @Override
     public String getClassicAddress(boolean isReal) {
-        if (isReal) { return wallet.classicAddress().toString(); }
-        return walletTest.classicAddress().toString();
+        if (isReal && wallet != null) {
+            return wallet.classicAddress().toString();
+        } else if (walletTest != null) {
+            return walletTest.classicAddress().toString();
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
     public String getPrivateKey(boolean isReal) {
-        if (isReal) { return wallet.privateKey().get(); }
-        return walletTest.privateKey().get();
+        if (isReal && wallet != null) {
+            return wallet.privateKey().get();
+        } else if (walletTest != null) {
+            return walletTest.privateKey().get();
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
     public String getXAddress(boolean isReal) {
-        if (isReal) { return wallet.xAddress().toString(); }
-        return walletTest.xAddress().toString();
+        if (isReal && wallet != null) {
+            return wallet.xAddress().toString();
+        } else if (walletTest != null) {
+            return walletTest.xAddress().toString();
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
     public String getPublicKey(boolean isReal) {
-        if (isReal) { return wallet.publicKey(); }
-        return walletTest.publicKey();
+        if (isReal && wallet != null) {
+            return wallet.publicKey();
+        } else  if (walletTest != null) {
+            return walletTest.publicKey();
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
     public String getSeed(boolean isReal) {
-        if (isReal) { return wallet.getSeed(); }
-        return walletTest.getSeed();
+        if (isReal && wallet != null) {
+            return wallet.getSeed();
+        } else  if (walletTest != null) {
+            return walletTest.getSeed();
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
     public boolean isTest(boolean isReal) {
-        if (isReal) { return wallet.isTest(); }
-        return walletTest.isTest();
+        if (isReal && wallet != null) {
+            return wallet.isTest();
+        } else  if (walletTest != null) {
+            return walletTest.isTest();
+        }
+        return false;
     }
 
     @Override
@@ -124,8 +173,12 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
 
     @Override
     public BigDecimal getAllBalance(boolean isReal) {
-        if (isReal) { return wallet.getBalance(); }
-        return walletTest.getBalance();
+        if (isReal && wallet != null) {
+            return wallet.getBalance();
+        } else if (walletTest != null) {
+            return walletTest.getBalance();
+        }
+        return BigDecimal.ZERO;
     }
 
 
@@ -133,44 +186,84 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
     // Socket **********************************************************************************************************
 
     @Override
-    public String sendCommand(String command, CommandListener listener) throws InvalidStateException {
-        return socket.sendCommand(command, null, listener);
+    public String sendCommand(String command, CommandListener listener, boolean isReal) throws InvalidStateException {
+        if (isReal && socket != null) {
+            return socket.sendCommand(command, null, listener);
+        } else if (socketTest != null) {
+            return socketTest.sendCommand(command, null, listener);
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
-    public String sendCommand(String command, Map<String, Object> parameters, CommandListener listener)
+    public String sendCommand(String command, Map<String, Object> parameters, CommandListener listener, boolean isReal)
             throws InvalidStateException {
-        return socket.sendCommand(command, parameters, listener);
+        if (isReal && socket != null) {
+            return socket.sendCommand(command, parameters, listener);
+        } else if (socketTest != null) {
+            socketTest.sendCommand(command, parameters, listener);
+        }
+        return StringEnum.WALLET_NOT_ACTIVATED.getValue();
     }
 
     @Override
-    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, StreamSubscriber subscriber)
+    public void subscribe(EnumSet<StreamSubscriptionEnum> streams, StreamSubscriber subscriber, boolean isReal)
             throws InvalidStateException {
-        socket.subscribe(streams, subscriber);
+        if (isReal && socket != null) {
+            socket.subscribe(streams, subscriber);
+        } else if (socketTest != null) {
+            socketTest.subscribe(streams, subscriber);
+        }
     }
 
     @Override
     public void subscribe(EnumSet<StreamSubscriptionEnum> streams, Map<String, Object> parameters,
-                          StreamSubscriber subscriber) throws InvalidStateException {
-        socket.subscribe(streams, parameters, subscriber);
+                          StreamSubscriber subscriber, boolean isReal) throws InvalidStateException {
+        if (isReal && socket != null) {
+            socket.subscribe(streams, parameters, subscriber);
+        } else if (socketTest != null) {
+            socketTest.subscribe(streams, parameters, subscriber);
+        }
     }
 
     @Override
-    public void unsubscribe(EnumSet<StreamSubscriptionEnum> streams) throws InvalidStateException {
-        socket.unsubscribe(streams);
+    public void unsubscribe(EnumSet<StreamSubscriptionEnum> streams, boolean isReal) throws InvalidStateException {
+        if (isReal) {
+            socket.unsubscribe(streams);
+        } else if (socketTest != null) {
+            socketTest.unsubscribe(streams);
+        }
     }
 
     @Override
-    public EnumSet<StreamSubscriptionEnum> getActiveSubscriptions() {
-        return socket.getActiveSubscriptions();
+    public EnumSet<StreamSubscriptionEnum> getActiveSubscriptions(boolean isReal) {
+        if (isReal && socket != null) {
+            return socket.getActiveSubscriptions();
+        } else if (socketTest != null) {
+            return socketTest.getActiveSubscriptions();
+        }
+        return null;
     }
 
     @Override
-    public void closeWhenComplete() {
-        socket.closeWhenComplete();
+    public void closeWhenComplete(boolean isReal) {
+        if (isReal) {
+            socket.closeWhenComplete();
+        } else if (socketTest != null) {
+            socketTest.closeWhenComplete();
+        }
     }
 
 
 
     // Presets *********************************************************************************************************
+
+
+    public void setPresets(BooleanEnum enums, boolean b) {
+        BooleanEnum.setValue(enums, b);
+    }
+
+    public void setPresets(StringEnum enums, String s) {
+        StringEnum.setValue(enums, s);
+    }
 }
