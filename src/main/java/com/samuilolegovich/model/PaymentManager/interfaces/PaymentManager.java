@@ -5,7 +5,6 @@ import java.util.Map;
 
 public interface PaymentManager {
     void sendPayment(String address, Integer tag, BigDecimal numberOfXRP, boolean isReal);
-    void monitorAccountReplenishmentXRP(Object o, boolean isReal);
     void setterWallet(boolean isReal);
     void updateWallet(boolean isReal);
 

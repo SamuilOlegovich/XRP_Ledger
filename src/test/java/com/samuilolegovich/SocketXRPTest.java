@@ -2,8 +2,8 @@ package com.samuilolegovich;
 
 import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
-import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
-import com.samuilolegovich.model.sockets.XRPLedgerClient;
+import com.samuilolegovich.model.PaymentManager.PaymentAndSocketManagerXRPL;
+import com.samuilolegovich.model.sockets.SocketXRP;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
 import org.junit.After;
@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 import static com.samuilolegovich.enums.StringEnum.*;
 
 
-public class XRPLedgerClientTest {
-    private static final Logger LOG = LoggerFactory.getLogger(XRPLedgerClientTest.class);
+public class SocketXRPTest {
+    private static final Logger LOG = LoggerFactory.getLogger(SocketXRPTest.class);
 
     private final String RESPONSE ="response";
     private final String SUCCESS ="success";
@@ -33,9 +33,9 @@ public class XRPLedgerClientTest {
 
     private int transactionsSize = 100;
 
-    private PaymentManagerXRP paymentManager;
+    private PaymentAndSocketManagerXRPL paymentManager;
     private List<String> transactions;
-    private XRPLedgerClient client;
+    private SocketXRP client;
     private String idCommand;
 
 
@@ -48,7 +48,7 @@ public class XRPLedgerClientTest {
         BooleanEnum.setValue(BooleanEnum.IS_REAL, false);
         BooleanEnum.setValue(BooleanEnum.IS_WALLET_TEST, false);
 
-        client = new XRPLedgerClient(WSS_REAL.getValue());
+        client = new SocketXRP(WSS_REAL.getValue());
         client.connectBlocking(3000, TimeUnit.MILLISECONDS);
     }
 
@@ -140,7 +140,7 @@ public class XRPLedgerClientTest {
     //                        ],
     //         "TransactionIndex":85,
     //         "TransactionResult":"tesSUCCESS",
-    //         "delivered_amount":"1000000"
+    //         "delivered_amount":"1000000"  <<<<  ---- использовать для подсчета платежа чтобы не ошибиться
     //      },
     //  "status":"closed",
     //  "transaction":{
@@ -190,7 +190,7 @@ public class XRPLedgerClientTest {
         // Subscribe to the stream of wallet balance changes.
         // Подписаться на стрим изменения баланса кошелька *************************************************************
         client.close();
-        client = new XRPLedgerClient(WSS_TEST.getValue());
+        client = new SocketXRP(WSS_TEST.getValue());
         client.connectBlocking(3000, TimeUnit.MILLISECONDS);
         transactionsSize = 1;
 
@@ -199,12 +199,12 @@ public class XRPLedgerClientTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("accounts", List.of(paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB())));
 
-        client.subscribe(EnumSet.of(StreamSubscriptionEnum.ACCOUNT_CHANNELS), parameters, (subscription, message) -> {
-            if (message.has("engine_result")
-                    && message.has("transaction")
-                    && message.getJSONObject("transaction").has("DestinationTag")
-                    && message.getJSONObject("transaction").getInt("DestinationTag") == TAG) {
+        // {"fee_base":10,"fee_ref":10,"ledger_hash":"EEBA6A5B289985147534116BAA423B7632DB10084610D644432816D20438FCB8","ledger_index":27740129,"ledger_time":705777011,"reserve_base":10000000,"reserve_inc":2000000,"txn_count":0,"type":"ledgerClosed","validated_ledgers":"26210849-27740129"}
+        // {"fee_base":10,"fee_ref":10,"ledger_hash":"2EECA75B763163423DDBBDCC98F8D8BC40E1BA242A2B688943196BC4D6BC021D","ledger_index":27740128,"ledger_time":705777010,"reserve_base":10000000,"reserve_inc":2000000,"txn_count":3,"type":"ledgerClosed","validated_ledgers":"26210849-27740128"}
+        // {"fee_base":10,"fee_ref":10,"ledger_hash":"119916DB36CF9D99BE6C6E233BE7C7B49801E751CC8FD42A13CB53C1D9189FE0","ledger_index":27740127,"ledger_time":705777002,"reserve_base":10000000,"reserve_inc":2000000,"txn_count":15,"type":"ledgerClosed","validated_ledgers":"26210849-27740127"}
 
+        client.subscribe(EnumSet.of(StreamSubscriptionEnum.ACCOUNT_CHANNELS), parameters, (subscription, message) -> {
+            if (message.getJSONObject("transaction").has("DestinationTag")) {
                 Assert.assertEquals(TAG, message.getJSONObject("transaction").getInt("DestinationTag"));
                 Assert.assertEquals("tesSUCCESS", message.getString("engine_result"));
                 Assert.assertEquals("transaction",message.getString("type"));
@@ -226,9 +226,9 @@ public class XRPLedgerClientTest {
             LOG.info("Получил сообщение от подписки {}: {}", subscription.getMessageType(), message);
             transactions.add(message.toString());
         });
-        Thread.sleep(15000);
+
+        Thread.sleep(5000);
         makePayment();
-        Thread.sleep(15000);
     }
 
     @After
@@ -258,7 +258,7 @@ public class XRPLedgerClientTest {
 
     private void createPaymentManager() {
         LOG.info("Создаем менеджера платежей.");
-        paymentManager = new PaymentManagerXRP();
+        paymentManager = new PaymentAndSocketManagerXRPL();
         LOG.info("Менеджер платежей создан.");
     }
 

@@ -2,7 +2,7 @@ package com.samuilolegovich;
 
 import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
-import com.samuilolegovich.model.PaymentManager.PaymentManagerXRP;
+import com.samuilolegovich.model.PaymentManager.PaymentAndSocketManagerXRPL;
 import com.samuilolegovich.model.PaymentManager.interfaces.PaymentManager;
 import org.junit.After;
 import org.junit.Assert;
@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-public class PaymentManagerXRPTest {
+public class PaymentAndSocketManagerXRPLTest {
     private PaymentManager paymentManager;
     private String classicAddress;
     private String privateKey;
@@ -173,7 +173,7 @@ public class PaymentManagerXRPTest {
     }
 
     private void createPaymentManager() {
-        paymentManager = new PaymentManagerXRP();
+        paymentManager = new PaymentAndSocketManagerXRPL();
     }
 
     private void initBeforePay() {
