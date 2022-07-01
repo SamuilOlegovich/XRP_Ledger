@@ -10,7 +10,7 @@ import com.samuilolegovich.model.sockets.SocketXRPTest;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
 import com.samuilolegovich.model.sockets.interfaces.CommandListener;
-import com.samuilolegovich.model.sockets.interfaces.StreamSubscriber;
+import com.samuilolegovich.subscribers.interfaces.StreamSubscriber;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
 import org.java_websocket.client.WebSocketClient;

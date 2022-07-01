@@ -1,13 +1,13 @@
-package com.samuilolegovich.model.sockets;
+package com.samuilolegovich.subscribers;
 
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
-import com.samuilolegovich.model.sockets.interfaces.StreamSubscriber;
+import com.samuilolegovich.subscribers.interfaces.StreamSubscriber;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StreamSubscriberImpl implements StreamSubscriber {
-    private static final Logger LOG = LoggerFactory.getLogger(StreamSubscriberImpl.class);
+public class MyStreamSubscriber implements StreamSubscriber {
+    private static final Logger LOG = LoggerFactory.getLogger(MyStreamSubscriber.class);
 
     @Override
     public void onSubscription(StreamSubscriptionEnum subscription, JSONObject message) {

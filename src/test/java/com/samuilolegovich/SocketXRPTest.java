@@ -81,6 +81,25 @@ public class SocketXRPTest {
         });
     }
 
+    /*
+    *   16:23:08.702 [main] INFO com.samuilolegovich.model.sockets.SocketXRP - Subscribing to: [TRANSACTIONS]
+        16:23:08.708 [main] INFO com.samuilolegovich.model.sockets.SocketXRP - Sending message: {"streams":["transactions"],"command":"subscribe"}
+    *   16:25:50.677 [WebSocketConnectReadThread-21] INFO com.samuilolegovich.model.sockets.SocketXRP - XRPL client received a message: {"result":{},"status":"success","type":"response"}
+    *
+    *   16:30:15.083 [main] INFO com.samuilolegovich.model.sockets.SocketXRP - Subscribing to: [ACCOUNT_CHANNELS]
+        16:30:15.086 [main] INFO com.samuilolegovich.model.sockets.SocketXRP - Sending message: {"streams":["ledger"],"accounts":["rnxYi2nuJiS1AnYmXN75JHJr8MWQZLRPSx"],"command":"subscribe"}
+        16:30:15.255 [WebSocketConnectReadThread-24] INFO com.samuilolegovich.model.sockets.SocketXRP - XRPL client received a message:
+        {"result":{"fee_base":10,"fee_ref":10,"ledger_hash":"BBC69F9AA2F2ABFE4A7724E4883D357D2EDDAAF12AB35A28C47EC1017AFAA2D8","ledger_index":28507631,"ledger_time":708183011,"reserve_base":10000000,"reserve_inc":2000000,"validated_ledgers":"28046726-28507631"},"status":"success","type":"response"}
+
+*  Sending message: {"command":"subscribe","streams":"[ledger]","accounts":"[rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx]"}
+*
+*        I/System.out: 16:14:12.328 [Thread-2] INFO com.samuilolegovich.wallet.model.sockets.SocketXRP - Subscribing to: [ACCOUNT_CHANNELS]
+*       I/System.out: 16:14:12.329 [Thread-2] INFO com.samuilolegovich.wallet.model.sockets.SocketXRP - Sending message: {"command":"subscribe","streams":"[ledger]","accounts":"[rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx]"}
+        I/System.out: 16:14:12.507 [WebSocketConnectReadThread-403] INFO com.samuilolegovich.wallet.model.sockets.SocketXRP - XRPL client received a message:
+        I/System.out: {"error":"invalidParams","error_code":31,"error_message":"Invalid parameters.","request":{"accounts":"[rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx]","command":"subscribe","streams":"[ledger]"},"status":"error","type":"response"}
+    * */
+
+
     @Test
     public void sendCommandWithParametersAccountChannels() throws InvalidStateException {
         // Send a command with parameters.
@@ -213,20 +232,14 @@ public class SocketXRPTest {
 
                 Assert.assertEquals("The transaction was applied. Only final in a validated ledger.",
                         message.getString("engine_result_message"));
-                Assert.assertEquals(paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB()),
-                        message.getJSONObject("transaction").getString("Account"));
-                Assert.assertEquals(ADDRESS_FOR_SEND_TEST.getValue(),
-                        message.getJSONObject("transaction").getString("Destination"));
+                Assert.assertEquals(paymentManager.getClassicAddress(BooleanEnum.IS_REAL.isB()), message.getJSONObject("transaction").getString("Account"));
+                Assert.assertEquals(ADDRESS_FOR_SEND_TEST.getValue(), message.getJSONObject("transaction").getString("Destination"));
                 Assert.assertEquals("Payment",
                         message.getJSONObject("transaction").getString("TransactionType"));
 
                 conclusionAboutPositiveResult();
             }
-
-            LOG.info("Получил сообщение от подписки {}: {}", subscription.getMessageType(), message);
-            transactions.add(message.toString());
         });
-
         Thread.sleep(5000);
         makePayment();
     }

@@ -1,4 +1,4 @@
-package com.samuilolegovich.model.sockets.interfaces;
+package com.samuilolegovich.subscribers.interfaces;
 
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import org.json.JSONObject;

@@ -9,6 +9,7 @@ import com.samuilolegovich.model.wallets.interfaces.MyWallets;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
+import org.xrpl.xrpl4j.codec.addresses.exceptions.EncodingFormatException;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
@@ -215,6 +216,7 @@ public class WalletXRP implements Wallet, MyWallets {
 
             // Sign the Payment
             signedPayment = signatureService.sign(KeyMetadata.EMPTY, payment);
+            // EncodingFormatException: Checksum does not validate
             System.out.println("Signed Payment:  -- >  " + signedPayment.signedTransaction());
 
 
