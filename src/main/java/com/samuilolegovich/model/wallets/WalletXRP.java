@@ -5,11 +5,10 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.samuilolegovich.enums.BooleanEnum;
 import com.samuilolegovich.enums.StringEnum;
+import com.samuilolegovich.model.myClient.MyXrplClient;
 import com.samuilolegovich.model.wallets.interfaces.MyWallets;
 import okhttp3.HttpUrl;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
-import org.xrpl.xrpl4j.client.XrplClient;
-import org.xrpl.xrpl4j.codec.addresses.exceptions.EncodingFormatException;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
@@ -45,8 +44,8 @@ public class WalletXRP implements Wallet, MyWallets {
     private UnsignedInteger lastLedgerSequence;
     private WalletFactory walletFactory;
     private UnsignedInteger sequence;
+    private MyXrplClient xrplClient;
     private Address classicAddress;
-    private XrplClient xrplClient;
     private HttpUrl rippledUrl;
     private Wallet wallet;
 
@@ -302,8 +301,7 @@ public class WalletXRP implements Wallet, MyWallets {
     private void createConnect() {
         // Connect --------------------------------------------------------
         // Соединять ------------------------------------------------------
-        rippledUrl = HttpUrl.get(StringEnum.NET_REAL_POST_URL_ONE.getValue());
-        xrplClient = new XrplClient(rippledUrl);
+        xrplClient = new MyXrplClient(StringEnum.NET_REAL_POST_URL_ONE.getValue());
     }
 
     private void getInformationAboutYourAccount() {

@@ -1,30 +1,17 @@
 package com.samuilolegovich;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.samuilolegovich.enums.StringEnum;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.json.JSONObject;
-import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
-import org.xrpl.xrpl4j.client.JsonRpcRequest;
-import org.xrpl.xrpl4j.model.client.XrplResult;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
-
-import static java.lang.Byte.parseByte;
-import static java.lang.Integer.parseInt;
 
 
 public class XRPLedgerApplication {
@@ -39,11 +26,7 @@ public class XRPLedgerApplication {
     }
 
     public static void okHttp() throws IOException {
-//        String json = "{\"method\":\"account_info\",\"params\":[\"AccountInfoRequestParams\":{\"account\":\"rJFR5n99ZP2AnZh1656iA6jVexLBG5G5TN\",\"ledgerSpecifier\":\"LedgerSpecifier\":{\"ledgerIndexShortcut\":\"validated\"},\"strict\":true,\"queue\":false,\"signerLists\":true}]}";
-//        String json = "{\"method\":\"account_info\",\"params\":[\"AccountInfoRequestParams\":{\"account\":\"rJFR5n99ZP2AnZh1656iA6jVexLBG5G5TN\",\"ledgerSpecifier\":\"LedgerSpecifier\":{\"ledgerIndexShortcut\":\"validated\"},\"strict\":true,\"queue\":false,\"signerLists\":true}]}";
-//        String json = "{\"method\":\"account_info\",\"params\":[{\"account\":\"rJFR5n99ZP2AnZh1656iA6jVexLBG5G5TN\",\"LedgerSpecifier\":{\"ledgerIndexShortcut\":\"validated\"},\"strict\":true,\"queue\":false,\"signerLists\":true}]}";
         String json = "{\"method\":\"account_info\",\"params\":[{\"account\":\"rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx\",\"LedgerSpecifier\":{\"ledgerIndexShortcut\":\"validated\"},\"strict\":true,\"queue\":false,\"signerLists\":true}]}";
-//        String json = "{method=account_info, params=[{account=rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx, LedgerSpecifier:{ledgerIndexShortcut=validated}, strict=true, queue=false, signerLists=true}]}";
         String url ="https://s1.ripple.com:51234/";
 
 
@@ -78,33 +61,6 @@ public class XRPLedgerApplication {
             System.out.println(result.toString());
         }
     }
-
-//    default <T extends XrplResult> T send(JsonRpcRequest request, JavaType resultType) throws JsonRpcClientErrorException {
-//        JsonNode response = postRpcRequest(request);
-//        System.out.println("_______________________  JsonNode response" + response.toString());
-//        JsonNode result = response.get("result");
-//        System.out.println("_______________________   JsonNode result" + result.toString());
-//        checkForError(response);
-//        try {
-//            return objectMapper.readValue(result.toString(), resultType);
-//        } catch (JsonProcessingException e) {
-//            throw new JsonRpcClientErrorException(e);
-//        }
-//    }
-//
-//    default void checkForError(JsonNode response) throws JsonRpcClientErrorException {
-//        if (response.has("result")) {
-//            JsonNode result = response.get("result");
-//            if (result.has("error")) {
-//                String errorMessage = Optional.ofNullable(result.get("error_exception"))
-//                        .map(JsonNode::asText)
-//                        .orElseGet(() -> result.get("error_message").asText());
-//                throw new JsonRpcClientErrorException(errorMessage);
-//            }
-//        }
-//    }
-
-
 
 
 
