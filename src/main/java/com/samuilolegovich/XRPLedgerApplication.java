@@ -9,9 +9,12 @@ import okhttp3.RequestBody;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
+
+import static java.lang.Integer.parseInt;
 
 
 public class XRPLedgerApplication {
@@ -20,9 +23,84 @@ public class XRPLedgerApplication {
     public static void main(String[] args) throws Exception {
         // Обязательно стоит установить локаль иначе будет падать с ошибкой парсинга даты
         Locale.setDefault(Locale.ENGLISH);
-        okHttp();
+//        okHttp();
+//        test();
+
+    }
 
 
+    // зашифровать соль
+    public static String encryptStringForSalt(String string, String vedroId) {
+        StringBuilder stringBuilder = new StringBuilder(string);
+        stringBuilder.reverse();
+        stringBuilder.append(vedroId);
+        stringBuilder.reverse();
+        return getBase64(stringBuilder.toString());
+    }
+
+    // расшифровать соль
+    private static String decryptStringForSalt(String string, String vedroId) {
+        StringBuilder stringBuilder = new StringBuilder(getFromBase64(string));
+        stringBuilder.reverse();
+        stringBuilder.replace(stringBuilder.length() - vedroId.length(),
+                stringBuilder.length(), "");
+        stringBuilder.reverse();
+        return stringBuilder.toString();
+    }
+
+    // шифрование
+    public static String getBase64(String string) {
+        String result = null;
+        byte[] bytes = null;
+
+        try {
+            bytes = string.getBytes("utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        if (bytes != null) {
+            result = Arrays.toString(Base64.getEncoder().encode(bytes))
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", "")
+                    .replaceAll(",", "");
+        }
+
+        return result;
+    }
+
+
+    // расшифровать
+    public static String getFromBase64(String string) {
+        String result = null;
+        getByteList();
+        byte[] bb;
+        byte[] b;
+
+        if (string != null) {
+            try {
+                String[] strings = string.split(" ");
+
+                bb = new byte[strings.length];
+
+                for (int i = 0; i < strings.length; i++) {
+                    bb[i] = bytes[parseInt(strings[i])];
+                }
+
+                b = Base64.getDecoder().decode(bb);
+                result = new String(b, "utf-8");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    // пересмотреть этот момент так быть не должно сделал на скорую руку кастыль чтобы не зависать
+    private static void getByteList() {
+        for (int b = 0; b < 128; b++) {
+            bytes[b] = (byte) b;
+        }
     }
 
     public static void okHttp() throws IOException {
