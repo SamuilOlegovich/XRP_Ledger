@@ -10,6 +10,7 @@ import com.samuilolegovich.model.sockets.SocketXRPTest;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
 import com.samuilolegovich.model.sockets.interfaces.CommandListener;
+import com.samuilolegovich.subscribers.MyStreamSubscriber;
 import com.samuilolegovich.subscribers.interfaces.StreamSubscriber;
 import com.samuilolegovich.model.wallets.WalletXRP;
 import com.samuilolegovich.model.wallets.WalletXRPTest;
@@ -19,9 +20,20 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.samuilolegovich.enums.StringEnum.ADDRESS_FOR_SUBSCRIBE_AND_MONITOR;
+
 
 public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManager, Presets {
+    private static PaymentAndSocketManagerXRPL paymentAndSocketManagerXRPL;
+
+    private Integer NUMBER_OF_SOCKET_RESTARTS = 100;
+    private Long TIME_OF_SOCKET_RESTARTS = 20000L;
+    private Integer numberOfSocketRestarts;
+
     private WalletXRPTest walletTest;
     private SocketXRPTest socketTest;
 
@@ -30,10 +42,11 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
 
 
     public PaymentAndSocketManagerXRPL() {
-            this.socketTest = (SocketXRPTest) createNewSocket(false);
-            this.socket = (SocketXRP) createNewSocket(true);
-            this.walletTest = new WalletXRPTest();
-            this.wallet = new WalletXRP();
+        this.socketTest = (SocketXRPTest) createNewSocket(false);
+        this.socket = (SocketXRP) createNewSocket(true);
+        this.walletTest = new WalletXRPTest();
+        this.wallet = new WalletXRP();
+        paymentAndSocketManagerXRPL = this;
     }
 
     // подумать может более элегантно сделать проверку на нул - так чтобы не отдавать его дальше ***********************
@@ -41,9 +54,11 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
         if (isRealOrTest) {
             this.socket = (SocketXRP) createNewSocket(isRealOrTest);
             this.wallet = new WalletXRP();
+            paymentAndSocketManagerXRPL = this;
         } else {
             this.socketTest = (SocketXRPTest) createNewSocket(isRealOrTest);
             this.walletTest = new WalletXRPTest();
+            paymentAndSocketManagerXRPL = this;
         }
     }
 
@@ -54,6 +69,10 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
                     : new SocketXRPTest(StringEnum.WSS_TEST.getValue());
         } catch (URISyntaxException e) { e.printStackTrace(); }
         return null;
+    }
+
+    public static PaymentAndSocketManagerXRPL getInstances() {
+        return paymentAndSocketManagerXRPL;
     }
 
 
@@ -251,6 +270,60 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
             socket.closeWhenComplete();
         } else if (socketTest != null) {
             socketTest.closeWhenComplete();
+        }
+    }
+
+
+    public void restartSocket() {
+        this.socket = null;
+        this.socket = (SocketXRP) createNewSocket(true);
+        numberOfSocketRestarts++;
+
+        if (this.socket == null && numberOfSocketRestarts < NUMBER_OF_SOCKET_RESTARTS) {
+            try {
+                Thread.sleep(TIME_OF_SOCKET_RESTARTS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            restartSocket();
+        } else if (numberOfSocketRestarts >= NUMBER_OF_SOCKET_RESTARTS){
+            // ОТПРАВИТЬ В СЕНТРИ УВЕДОМЛЕНИЕ ЧТО СОКЕТ НЕ СТАРТАНУЛ НАДО ЧТО_ТО ДЕЛТЬ
+        } else {
+            numberOfSocketRestarts = 0;
+        }
+    }
+
+
+
+    public boolean startSocket() {
+        return connectBlocking();
+    }
+
+
+    private boolean connectBlocking() {
+        if (socket != null) {
+            try {
+                return socket.connectBlocking(3000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public void restartSubscribeTo() {
+        this.subscribeTo(true);
+    }
+
+    private void subscribeTo(boolean b) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("accounts", List.of(ADDRESS_FOR_SUBSCRIBE_AND_MONITOR));
+        try {
+            if (b) {
+                socket.subscribe(EnumSet.of(StreamSubscriptionEnum.ACCOUNT_CHANNELS), parameters, new MyStreamSubscriber());
+            }
+        } catch (InvalidStateException e) {
+            e.printStackTrace();
         }
     }
 

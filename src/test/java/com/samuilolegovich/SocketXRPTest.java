@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import static com.samuilolegovich.enums.StringEnum.*;
 
 
+
 public class SocketXRPTest {
     private static final Logger LOG = LoggerFactory.getLogger(SocketXRPTest.class);
 
@@ -106,15 +107,17 @@ public class SocketXRPTest {
             jsonArray.forEach(o -> {
                 JSONObject json = new JSONObject(o.toString());
                 LOG.info("*********************** " + json.getJSONObject("tx").get("DestinationTag"));
+                LOG.info("*********************** BB " + json.getJSONObject("meta")
+                        .getJSONArray("AffectedNodes")
+                        .getJSONObject(0)
+                        .getJSONObject("ModifiedNode")
+                        .getJSONObject("FinalFields")
+                        .getString("Balance"));
             });
 
             conclusionAboutPositiveResult();
         });
     }
-
-    // 15:51:51.462 [WebSocketConnectReadThread-21] INFO com.samuilolegovich.SocketXRPTest - *********************** {"tx":{"date":712413161,"Account":"rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx","Destination":"rGrEJZaBFYhPGuyM7NiJbJw2yXVB9vJHah","TransactionType":"Payment","ledger_index":73332009,"SigningPubKey":"0214C42799BD528C17F7B1180036F43E26879461D0CD16520140C60E6FF8D8392A","Amount":"1000000","Fee":"10","Flags":2147483648,"Sequence":679,"LastLedgerSequence":73332011,"TxnSignature":"304402201F71218605853F925C69888F6F8E32F77333FD575E22B35D94A7DCB466F00FD002206E5986A36BE4747EDF73452E255BD52BC9C40F52BA0984E294D9E022E321E030","inLedger":73332009,"DestinationTag":2021,"hash":"14DB365521594BCBAED8B470D8B0EA632C3EB8E7DFB2F1972B057C6657516A0B"},"validated":true,"meta":{"AffectedNodes":[{"ModifiedNode":{"LedgerIndex":"0748D7BF9071BD5DA46BEE5E3249DEA28F77DA6BA8C17A27C5B68CD6AFBCE27D","FinalFields":{"Account":"rGrEJZaBFYhPGuyM7NiJbJw2yXVB9vJHah","OwnerCount":0,"Flags":0,"Sequence":73071145,"Balance":"364720608"},"PreviousFields":{"Balance":"363720608"},"PreviousTxnLgrSeq":73331983,"LedgerEntryType":"AccountRoot","PreviousTxnID":"3DEACA83B22C66A8EB38ACE4EFFC28997131266954D98B74D2BE1C95BEB6E93D"}},{"ModifiedNode":{"LedgerIndex":"CFF42BC480FB4AD45D47A01463BBAC6339A0C1A219F51F11FF4413C134EFD3A8","FinalFields":{"Account":"rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx","OwnerCount":0,"Flags":0,"Sequence":680,"Balance":"231712451"},"PreviousFields":{"Sequence":679,"Balance":"232712461"},"PreviousTxnLgrSeq":73331983,"LedgerEntryType":"AccountRoot","PreviousTxnID":"3DEACA83B22C66A8EB38ACE4EFFC28997131266954D98B74D2BE1C95BEB6E93D"}}],"TransactionResult":"tesSUCCESS","TransactionIndex":15,"delivered_amount":"1000000"}}
-    //15:51:51.462 [WebSocketConnectReadThread-21] INFO com.samuilolegovich.SocketXRPTest - *********************** {"tx":{"date":712413061,"Account":"rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx","Destination":"rGrEJZaBFYhPGuyM7NiJbJw2yXVB9vJHah","TransactionType":"Payment","ledger_index":73331983,"SigningPubKey":"0214C42799BD528C17F7B1180036F43E26879461D0CD16520140C60E6FF8D8392A","Amount":"3000000","Fee":"10","Flags":2147483648,"Sequence":678,"LastLedgerSequence":73331985,"TxnSignature":"3045022100EA6D5AE3C01E0B8EF923553CC2FE41F5FFEE4518D931EB6E7F50FC5877CE4F0002206A385C2D0FEACFDDDA65BECB1FEFF3C9B5F011645501EDEEBC4CBABFF3FFC683","inLedger":73331983,"DestinationTag":205,"hash":"3DEACA83B22C66A8EB38ACE4EFFC28997131266954D98B74D2BE1C95BEB6E93D"},"validated":true,"meta":{"AffectedNodes":[{"ModifiedNode":{"LedgerIndex":"0748D7BF9071BD5DA46BEE5E3249DEA28F77DA6BA8C17A27C5B68CD6AFBCE27D","FinalFields":{"Account":"rGrEJZaBFYhPGuyM7NiJbJw2yXVB9vJHah","OwnerCount":0,"Flags":0,"Sequence":73071145,"Balance":"363720608"},"PreviousFields":{"Balance":"360720608"},"PreviousTxnLgrSeq":73330872,"LedgerEntryType":"AccountRoot","PreviousTxnID":"FA9704770DF377FC22461184D21BCAB6796ED2D9806C32724EB70C92203B7607"}},{"ModifiedNode":{"LedgerIndex":"CFF42BC480FB4AD45D47A01463BBAC6339A0C1A219F51F11FF4413C134EFD3A8","FinalFields":{"Account":"rsG3xqRQSnxfYfF9foHfy7fNEZZctDc3Dx","OwnerCount":0,"Flags":0,"Sequence":679,"Balance":"232712461"},"PreviousFields":{"Sequence":678,"Balance":"235712471"},"PreviousTxnLgrSeq":73330908,"LedgerEntryType":"AccountRoot","PreviousTxnID":"7A6C7F7B184A3CE3BCC774CCA6B4732363CA4EEE9398E16E1C8D5229552F3B1E"}}],"TransactionResult":"tesSUCCESS","TransactionIndex":27,"delivered_amount":"3000000"}}
-
 
 
 

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.samuilolegovich.model.sockets.enums.StreamSubscriptionEnum;
 import com.samuilolegovich.model.sockets.exceptions.InvalidStateException;
 import com.samuilolegovich.model.sockets.interfaces.CommandListener;
+import com.samuilolegovich.model.sockets.runnable.RestartSubscriberRun;
 import com.samuilolegovich.subscribers.interfaces.StreamSubscriber;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -150,6 +151,7 @@ public class SocketXRP extends WebSocketClient {
         LOG.info("XRP ledger client closed (code {}), reason given: {}", code, reason);
         activeSubscriptions.clear();
         commandListeners.clear();
+        restartSocket(code);
     }
 
     @Override
@@ -181,5 +183,19 @@ public class SocketXRP extends WebSocketClient {
 
     private void checkOpen() throws InvalidStateException {
         if (!isOpen()) { throw new InvalidStateException(); }
+    }
+
+    private void restartSocket(int code) {
+        if (RestartSubscriberRun.FLAG) {
+            RestartSubscriberRun restartSubscriberRun;
+            if (code == 1006) {
+                restartSubscriberRun = new RestartSubscriberRun(10000);
+            } else if (code == -1) {
+                restartSubscriberRun = new RestartSubscriberRun(20000);
+            } else {
+                restartSubscriberRun = new RestartSubscriberRun();
+            }
+            new Thread(restartSubscriberRun).start();
+        }
     }
 }
