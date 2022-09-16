@@ -13,15 +13,11 @@ public class RestartSubscriberRun implements Runnable {
 
 
     public RestartSubscriberRun() {
-        this.time = 1000;
+        this.time = 3000;
     }
 
     public RestartSubscriberRun(Integer time) {
         this.time = time;
-    }
-
-    public RestartSubscriberRun(String nameModule) {
-        this.time = 1000;
     }
 
 
@@ -29,10 +25,31 @@ public class RestartSubscriberRun implements Runnable {
     @Override
     public void run() {
         FLAG = false;
-        restartSocket();
         startSocket();
         restartSubscribeTo();
         FLAG = true;
+    }
+
+
+
+    private void startSocket() {
+        boolean b = false;
+
+        while (!b) {
+            restartSocket();
+            try {
+                b = paymentManager.startSocket();
+            } catch (Exception e) {
+                b = false;
+                e.printStackTrace();
+            }
+
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -46,25 +63,7 @@ public class RestartSubscriberRun implements Runnable {
         }
     }
 
-    private void startSocket() {
-        boolean b = false;
 
-        while (!b) {
-            try {
-                b = paymentManager.startSocket();
-            } catch (Exception e) {
-                b = false;
-                restartSocket();
-                e.printStackTrace();
-            }
-
-            try {
-                Thread.sleep(time);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private void restartSubscribeTo() {
         try {

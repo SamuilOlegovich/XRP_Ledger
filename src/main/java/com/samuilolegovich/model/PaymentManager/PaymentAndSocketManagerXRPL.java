@@ -27,12 +27,9 @@ import java.util.concurrent.TimeUnit;
 import static com.samuilolegovich.enums.StringEnum.ADDRESS_FOR_SUBSCRIBE_AND_MONITOR;
 
 
+
 public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManager, Presets {
     private static PaymentAndSocketManagerXRPL paymentAndSocketManagerXRPL;
-
-    private Integer NUMBER_OF_SOCKET_RESTARTS = 100;
-    private Long TIME_OF_SOCKET_RESTARTS = 20000L;
-    private Integer numberOfSocketRestarts;
 
     private WalletXRPTest walletTest;
     private SocketXRPTest socketTest;
@@ -277,20 +274,6 @@ public class PaymentAndSocketManagerXRPL implements PaymentManager, SocketManage
     public void restartSocket() {
         this.socket = null;
         this.socket = (SocketXRP) createNewSocket(true);
-        numberOfSocketRestarts++;
-
-        if (this.socket == null && numberOfSocketRestarts < NUMBER_OF_SOCKET_RESTARTS) {
-            try {
-                Thread.sleep(TIME_OF_SOCKET_RESTARTS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            restartSocket();
-        } else if (numberOfSocketRestarts >= NUMBER_OF_SOCKET_RESTARTS){
-            // ОТПРАВИТЬ В СЕНТРИ УВЕДОМЛЕНИЕ ЧТО СОКЕТ НЕ СТАРТАНУЛ НАДО ЧТО_ТО ДЕЛТЬ
-        } else {
-            numberOfSocketRestarts = 0;
-        }
     }
 
 
